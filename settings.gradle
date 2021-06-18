@@ -15,4 +15,3 @@
  */
 
 rootProject.name = 'atlas-gradle'
-include('lib')
