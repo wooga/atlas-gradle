@@ -23,7 +23,7 @@ plugins {
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.2'
     id 'io.codearte.nexus-staging' version '0.30.0'
-    id "de.marcphilipp.nexus-publish" version "0.4.0"
+    id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
 }
 
 group 'net.wooga.gradle'
@@ -43,8 +43,6 @@ sourceSets {
 }
 
 repositories {
-    // Use JCenter for resolving dependencies.
-    //jcenter()
     mavenCentral()
 }
 
@@ -57,7 +55,7 @@ nexusPublishing {
 nexusStaging {
     username = project.hasProperty('ossrhUsername') ? project.property('ossrhUsername') : System.getenv('OSSRH_USERNAME')
     password = project.hasProperty('ossrhPassword') ? project.property('ossrhPassword') : System.getenv('OSSRH_PASSWORD')
-    packageGroup = "com.wooga"
+    packageGroup = "net.wooga"
 }
 
 task sourcesJar(type: Jar) {
@@ -85,7 +83,7 @@ publishing {
             }
 
             pom {
-                name = 'Atlas Gradle extension'
+                name = 'Atlas Gradle Framework'
                 description = 'A library for providing APIs for the development of Gradle plugins.'
                 url = 'https://github.com/wooga/atlas-gradle'
 
