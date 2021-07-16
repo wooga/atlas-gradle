@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Wooga GmbH
+ * Copyright 2021 Wooga GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package wooga.gradle
 
+
 import org.gradle.api.Project
+import org.gradle.api.Transformer
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFile
@@ -24,6 +26,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 
 import java.util.concurrent.Callable
+
 
 class PropertyLookup {
     /**
@@ -136,21 +139,15 @@ class PropertyLookup {
         getValue(properties, environment) as String
     }
 
-//    <T> Provider<T> getProvider(ProviderFactory factory, Map<String, ?> properties, Map<String, ?> env = null) {
-//        factory.provider({
-//            getValue(properties) as T
-//        })
-//    }
-
     Provider<String> getStringValueProvider(ProviderFactory factory, Map<String, ?> properties, Map<String, ?> env = null) {
         factory.provider({
-            getValueAsString(properties)
+            getValueAsString(properties, env)
         })
     }
 
     Provider<Boolean> getBooleanValueProvider(ProviderFactory factory, Map<String, ?> properties, Map<String, ?> env = null) {
         factory.provider({
-            getValueAsBoolean(properties)
+            getValueAsBoolean(properties, env)
         })
     }
 

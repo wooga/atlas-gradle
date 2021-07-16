@@ -3,7 +3,6 @@ package wooga.gradle
 
 import spock.lang.Specification
 import spock.lang.Unroll
-import wooga.gradle.PropertyLookup
 
 class PropertyLookupTest extends Specification {
 
