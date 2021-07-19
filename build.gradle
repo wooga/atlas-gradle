@@ -64,6 +64,14 @@ dependencies {
     api 'org.apache.commons:commons-math3:3.6.1'
 }
 
+// TODO: Remove in the future when nebule-release is removed
+List<String> cliTasks = project.rootProject.gradle.startParameter.taskNames
+if (cliTasks.contains("rc")) {
+    cliTasks.remove("rc")
+    cliTasks.add("candidate")
+    project.rootProject.gradle.startParameter.setTaskNames(cliTasks)
+}
+
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     withJavadocJar()
