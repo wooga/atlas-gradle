@@ -14,7 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@Library('github.com/wooga/atlas-jenkins-pipeline@update/java_lib_ossrh_no_snapshots_by_default') _
-withCredentials([]) {
+@Library('github.com/wooga/atlas-jenkins-pipeline@1.x') _
+
+withCredentials([string(credentialsId: 'atlas_gradle_coveralls_token', variable: 'coveralls_token')]) {
     buildJavaLibraryOSSRH()
 }
