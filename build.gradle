@@ -28,7 +28,7 @@ plugins {
 }
 
 group 'com.wooga.gradle'
-description = 'A library to provide APIs and utilities for our gradle projects.'
+description = 'A library to provide reusable components and utilities for our gradle projects.'
 
 sourceSets {
     main {
@@ -94,15 +94,15 @@ publishing {
             pom {
                 name = 'Atlas Gradle Framework'
                 description = 'A library for providing APIs for the development of Gradle plugins.'
-                url = 'https://github.com/wooga/atlas-gradle'
+                url = 'https://github.com/wooga/gradle-commons'
 
                 artifactId = project.name
                 inceptionYear = "2021"
 
                 scm {
-                    connection = 'scm:git:https://github.com/wooga/atlas-gradle.git'
-                    developerConnection = 'scm:git:https://github.com/wooga/atlas-gradle.git'
-                    url = 'https://github.com/wooga/atlas-gradle.git'
+                    connection = 'scm:git:https://github.com/wooga/gradle-commons.git'
+                    developerConnection = 'scm:git:https://github.com/wooga/gradle-commons.git'
+                    url = 'https://github.com/wooga/gradle-commons.git'
                 }
 
                 licenses {

@@ -1,15 +1,12 @@
-atlas-gradle
-===========
+# gradle-commons
 
 This library provides APIs for the use of Wooga's Gradle plugins.
 
-Development
-===========
+## Development
 
 [Code of Conduct](docs/Code-of-conduct.md)
 
-LICENSE
-=======
+## LICENSE
 
 Copyright 2021 Wooga GmbH
 
