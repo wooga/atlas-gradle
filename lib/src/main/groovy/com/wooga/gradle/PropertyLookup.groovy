@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package wooga.gradle
+package com.wooga.gradle
 
 
 import org.gradle.api.Project

@@ -1,4 +1,4 @@
-package wooga.gradle
+package com.wooga.gradle
 
 
 import spock.lang.Specification
