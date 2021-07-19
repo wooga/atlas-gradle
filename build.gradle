@@ -132,3 +132,13 @@ signing {
     useInMemoryPgpKeys(signingKeyId.toString(), signingKey.toString(), signingPassword.toString())
     sign publishing.publications.main
 }
+
+postRelease.dependsOn(tasks.publish)
+
+afterEvaluate {
+    tasks."final".dependsOn(tasks.publishToSonatype, tasks.closeAndReleaseSonatypeStagingRepository)
+    tasks."candidate".dependsOn(tasks.publishToSonatype, tasks.closeAndReleaseSonatypeStagingRepository)
+    tasks.publishToSonatype.mustRunAfter(tasks.postRelease)
+    tasks.closeSonatypeStagingRepository.mustRunAfter(tasks.publishToSonatype)
+    tasks.publish.mustRunAfter(tasks.release)
+}
