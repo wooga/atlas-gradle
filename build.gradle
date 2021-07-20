@@ -29,19 +29,6 @@ plugins {
 group 'com.wooga.gradle'
 description = 'A library to provide reusable components and utilities for our gradle projects.'
 
-//sourceSets {
-//    main {
-//        groovy {
-//            srcDirs = ['lib/src/main/groovy']
-//        }
-//    }
-//    test {
-//        groovy {
-//            srcDirs = ['lib/src/test/groovy']
-//        }
-//    }
-//}
-
 repositories {
     mavenCentral()
 }
