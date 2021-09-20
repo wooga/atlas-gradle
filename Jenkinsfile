@@ -16,6 +16,4 @@
  */
 @Library('github.com/wooga/atlas-jenkins-pipeline@1.x') _
 
-withCredentials([string(credentialsId: 'atlas_gradle_coveralls_token', variable: 'coveralls_token')]) {
-    buildJavaLibraryOSSRH()
-}
+buildJavaLibraryOSSRH()
