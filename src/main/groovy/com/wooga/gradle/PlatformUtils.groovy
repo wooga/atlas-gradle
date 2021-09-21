@@ -2,7 +2,7 @@ package com.wooga.gradle
 
 import groovy.json.StringEscapeUtils
 
-trait PlatformUtilsImpl {
+class PlatformUtils {
 
     private static final String _osName = System.getProperty("os.name").toLowerCase()
     private static final String _osArch = System.getProperty("os.arch").toLowerCase()
@@ -67,7 +67,4 @@ trait PlatformUtilsImpl {
     static String getUnixUserHomePath() {
         System.getProperty("user.home")
     }
-}
-
-class PlatformUtils implements PlatformUtilsImpl {
 }
