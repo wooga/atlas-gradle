@@ -3,6 +3,7 @@ package com.wooga.gradle
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ProviderFactory
+import org.gradle.api.tasks.Internal
 import org.gradle.internal.impldep.org.apache.http.annotation.Obsolete
 
 import javax.inject.Inject
@@ -12,20 +13,24 @@ import javax.inject.Inject
  */
 trait BaseSpec {
     @Inject
+    @Internal
     ProjectLayout getLayout() {
         throw new Exception("ProjectLayout is supposed to be injected here by gradle")
     }
 
+    @Internal
     ProviderFactory getProviderFactory() {
         getProviders()
     }
 
     @Inject
+    @Internal
     ProviderFactory getProviders() {
         throw new Exception("ProviderFactory is supposed to be injected here by gradle")
     }
 
     @Inject
+    @Internal
     ObjectFactory getObjects() {
         throw new Exception("ObjectFactory is supposed to be injected here by gradle")
     }
