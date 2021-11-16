@@ -77,4 +77,23 @@ class PropertyLookupTest extends Specification {
         expected = "7"
     }
 
+    def "creates lookup with generated environment key"() {
+        when:
+        def lookup =  PropertyLookup.WithEnvironmentKeyFromProperty (propertyKey, defaultValue)
+
+        then:
+        lookup.environmentKeys.size() == 1
+        lookup.environmentKeys[0] == expectedEnvironmentKey
+        def actual = lookup.getValue(props, env)
+        actual == expected
+
+        where:
+        propertyKey | expectedEnvironmentKey
+        "bread.ham" | "BREAD_HAM"
+        defaultValue = "FOO"
+        expected = 7
+        props = ["bread.ham": 7]
+        env = ["BREAD_HAM": 7]
+    }
+
 }
