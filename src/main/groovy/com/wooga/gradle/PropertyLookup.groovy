@@ -28,6 +28,10 @@ import org.gradle.api.provider.ProviderFactory
 import java.util.concurrent.Callable
 
 
+/**
+ * An utility object that is used for easily querying the system environment
+ * or a project's properties.
+ */
 class PropertyLookup {
     /**
      * Provided environment keys
@@ -54,26 +58,50 @@ class PropertyLookup {
      */
     String prefix = ""
 
+    /**
+     * A lookup that has multiple environment and property keys
+     */
     PropertyLookup(List<String> environmentKeys, List<String> propertyKeys, Object defaultValue) {
         this.environmentKeys = environmentKeys
         this.propertyKeys = propertyKeys
         this.defaultValue = defaultValue
     }
 
+    /**
+     * A lookup with multiple environment keys and a single property key
+     */
     PropertyLookup(List<String> environmentKeys, String propertyKey, Object defaultValue) {
         this(environmentKeys, [propertyKey], defaultValue)
     }
 
+    /**
+     * A lookup with multiple property keys and a single environment key
+     */
     PropertyLookup(String environmentKey, List<String> propertyKeys, Object defaultValue) {
         this([environmentKey], propertyKeys, defaultValue)
     }
 
+    /**
+     * A lookup with a single property key and an environment key
+     */
     PropertyLookup(String environmentKey, String propertyKey, Object defaultValue) {
         this([environmentKey], [propertyKey], defaultValue)
     }
 
+    /**
+     * A special-case lookup that just returns the default value
+     */
     PropertyLookup(Object defaultValue) {
         this([], [], defaultValue)
+    }
+
+    /**
+     * A property lookup that generates the environment key from the given property key,
+     * using a set convention
+     */
+    static PropertyLookup WithEnvironmentKeyFromProperty(String propertyKey, Object defaultValue) {
+        String envKey = PropertyUtils.envNameFromProperty(propertyKey)
+        return new PropertyLookup(envKey, propertyKey, defaultValue)
     }
 
     /**
