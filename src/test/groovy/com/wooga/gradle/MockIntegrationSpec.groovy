@@ -10,7 +10,7 @@ import org.junit.contrib.java.lang.system.ProvideSystemProperty
 import java.lang.reflect.ParameterizedType
 import java.nio.file.Files
 
-class MockIntegrationSpec extends IntegrationSpec {
+class MockIntegrationSpec extends com.wooga.gradle.test.IntegrationSpec {
 
     @Rule
     ProvideSystemProperty properties = new ProvideSystemProperty("ignoreDeprecations", "true")

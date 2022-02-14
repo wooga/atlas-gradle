@@ -47,6 +47,7 @@ dependencies {
         }
     }
     testImplementation 'com.github.stefanbirkner:system-rules:1.18.0'
+    testImplementation 'com.wooga.gradle:gradle-commons-test:0.3.0'
 
     api 'org.apache.commons:commons-math3:3.6.1'
 }
