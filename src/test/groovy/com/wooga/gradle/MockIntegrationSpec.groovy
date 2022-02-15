@@ -12,9 +12,6 @@ import java.nio.file.Files
 
 abstract class MockIntegrationSpec extends com.wooga.gradle.test.IntegrationSpec {
 
-    @Rule
-    ProvideSystemProperty properties = new ProvideSystemProperty("ignoreDeprecations", "true")
-
     def setup() {
         applyPlugin(MockPlugin)
     }
