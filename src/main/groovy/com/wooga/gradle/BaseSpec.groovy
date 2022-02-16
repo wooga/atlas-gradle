@@ -13,7 +13,6 @@ import javax.inject.Inject
  */
 trait BaseSpec {
     @Inject
-    @Internal
     ProjectLayout getLayout() {
         throw new Exception("ProjectLayout is supposed to be injected here by gradle")
     }
@@ -24,13 +23,11 @@ trait BaseSpec {
     }
 
     @Inject
-    @Internal
     ProviderFactory getProviders() {
         throw new Exception("ProviderFactory is supposed to be injected here by gradle")
     }
 
     @Inject
-    @Internal
     ObjectFactory getObjects() {
         throw new Exception("ObjectFactory is supposed to be injected here by gradle")
     }

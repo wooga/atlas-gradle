@@ -1,6 +1,6 @@
 package com.wooga.gradle
 
-import nebula.test.IntegrationSpec
+
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -10,7 +10,7 @@ import org.junit.contrib.java.lang.system.ProvideSystemProperty
 import java.lang.reflect.ParameterizedType
 import java.nio.file.Files
 
-class MockIntegrationSpec extends com.wooga.gradle.test.IntegrationSpec {
+abstract class MockIntegrationSpec extends com.wooga.gradle.test.IntegrationSpec {
 
     @Rule
     ProvideSystemProperty properties = new ProvideSystemProperty("ignoreDeprecations", "true")
@@ -58,7 +58,7 @@ class MockIntegrationSpec extends com.wooga.gradle.test.IntegrationSpec {
     }
 }
 
-class MockTaskIntegrationSpec<T extends MockTask> extends MockIntegrationSpec {
+abstract class MockTaskIntegrationSpec<T extends MockTask> extends MockIntegrationSpec {
 
     Class<T> getSubjectUnderTestClass() {
         if (!_sutClass) {
