@@ -52,6 +52,25 @@ dependencies {
     api 'org.apache.commons:commons-math3:3.6.1'
 }
 
+JavaPluginConvention javaConvention = (JavaPluginConvention)project.getConvention().getPlugin(JavaPluginConvention.class);
+SourceSet sourceSet = javaConvention.getSourceSets().getByName("test")
+
+TaskProvider<ValidatePlugins> validatorTask = tasks.register("validateMockedPlugins", ValidatePlugins) { task ->
+    task.setGroup("Plugin development");
+    task.setDescription("Validates the mocked plugins by checking parameter annotations on mocked task and artifact transform types etc.");
+    task.getOutputFile().set(layout.getBuildDirectory().file("reports/plugin-development/validation-report.txt"));
+    task.getClasses().setFrom(provider {
+        return sourceSet.getOutput().getClassesDirs();
+    })
+    task.getClasspath().setFrom(provider {
+        return sourceSet.getCompileClasspath();
+    })
+}
+
+tasks.named("check", {
+    it.dependsOn(validatorTask)
+})
+
 // TODO: Remove in the future when nebule-release is removed
 List<String> cliTasks = project.rootProject.gradle.startParameter.taskNames
 if (cliTasks.contains("rc")) {

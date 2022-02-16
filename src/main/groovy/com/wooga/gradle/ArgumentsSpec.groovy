@@ -80,6 +80,7 @@ trait ArgumentsSpec extends BaseSpec {
     /**
      * @return Retrieves both {@code internalArguments} and {@code additionalArguments}, to be consumed by a task.
      */
+    @Input
     Provider<List<String>> getArguments() {
         providers.provider({
             List<String> result = new ArrayList<String>()
