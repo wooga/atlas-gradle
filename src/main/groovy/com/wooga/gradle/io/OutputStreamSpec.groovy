@@ -26,7 +26,7 @@ trait OutputStreamSpec extends BaseSpec {
     OutputStream getOutputStream(File logFile) {
         OutputStream outputStream
         // If logging to stdout is enabled
-        if (logToStdout.get()) {
+        if (logToStdout.isPresent() && logToStdout.get()) {
             TextStream handler = new ForkTextStream()
             String lineSeparator = SystemProperties.getInstance().getLineSeparator()
             outputStream = new LineBufferingOutputStream(handler, lineSeparator)
