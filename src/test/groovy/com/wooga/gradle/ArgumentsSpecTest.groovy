@@ -69,15 +69,14 @@ class ArgumentsSpecTest extends MockTaskIntegrationSpec<ArgumentsUsingTask> {
         query.matches(result, expectedValue)
 
         where:
-        method                    | rawValue         | type                      | append | expectedValue
-        "argument"                | "--foo"          | "String"                  | true   | ["--test", "value", "--foo"]
-        "arguments"               | ["--foo", "bar"] | "List<String>"            | true   | ["--test", "value", "--foo", "bar"]
-        "arguments"               | ["--foo", "bar"] | "String[]"                | true   | ["--test", "value", "--foo", "bar"]
-        "setAdditionalArguments"  | ["--foo", "bar"] | "List<String>"            | false  | ["--foo", "bar"]
-        "setAdditionalArguments"  | ["--foo", "bar"] | "Provider<List<String>>"  | false  | ["--foo", "bar"]
-        "additionalArguments.set" | ["--foo", "bar"] | "List<String>"            | false  | ["--foo", "bar"]
-        // TODO: Add again once bug on commons-test wrapValueBasedOnType is fixed
-        //"additionalArguments.set" | ["--foo", "bar"] | "Provider<List<String>>>" | false  | ["--foo", "bar"]
+        method                    | rawValue         | type                     | append | expectedValue
+        "argument"                | "--foo"          | "String"                 | true   | ["--test", "value", "--foo"]
+        "arguments"               | ["--foo", "bar"] | "List<String>"           | true   | ["--test", "value", "--foo", "bar"]
+        "arguments"               | ["--foo", "bar"] | "String[]"               | true   | ["--test", "value", "--foo", "bar"]
+        "setAdditionalArguments"  | ["--foo", "bar"] | "List<String>"           | false  | ["--foo", "bar"]
+        "setAdditionalArguments"  | ["--foo", "bar"] | "Provider<List<String>>" | false  | ["--foo", "bar"]
+        "additionalArguments.set" | ["--foo", "bar"] | "List<String>"           | false  | ["--foo", "bar"]
+        "additionalArguments.set" | ["--foo", "bar"] | "Provider<List<String>>" | false  | ["--foo", "bar"]
 
         property = "additionalArguments"
         value = wrapValueBasedOnType(rawValue, type)
