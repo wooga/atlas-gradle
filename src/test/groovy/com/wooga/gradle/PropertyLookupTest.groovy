@@ -1,6 +1,14 @@
 package com.wooga.gradle
 
-
+import com.wooga.gradle.io.LogFileSpec
+import com.wooga.gradle.io.OutputStreamSpec
+import com.wooga.gradle.test.PropertyQueryTaskWriter
+import nebula.test.ProjectSpec
+import org.gradle.api.Action
+import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.TaskAction
+import org.gradle.process.ExecResult
+import org.gradle.process.ExecSpec
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -79,7 +87,7 @@ class PropertyLookupTest extends Specification {
 
     def "creates lookup with generated environment key"() {
         when:
-        def lookup =  PropertyLookup.WithEnvironmentKeyFromProperty (propertyKey, defaultValue)
+        def lookup = PropertyLookup.WithEnvironmentKeyFromProperty(propertyKey, defaultValue)
 
         then:
         lookup.environmentKeys.size() == 1
@@ -94,6 +102,121 @@ class PropertyLookupTest extends Specification {
         expected = 7
         props = ["bread.ham": 7]
         env = ["BREAD_HAM": 7]
+    }
+}
+
+class PropertyLookupProviderSpec extends ProjectSpec {
+
+    @Unroll
+    def "gets value #value from object provider"() {
+
+        given: "a property lookup"
+        def lookup = new PropertyLookup(value)
+
+        and: "a provider for it"
+        def provider = lookup.getObjectValueProvider(project)
+
+        when:
+        def actual = provider.get()
+
+        then:
+        actual == value
+
+        where:
+        value << [true, 42, "foobar"]
+    }
+
+    @Unroll
+    def "gets value #value from string provider"() {
+
+        given: "a property lookup"
+        def lookup = new PropertyLookup(value)
+
+        and: "a provider for it"
+        def provider = lookup.getStringValueProvider(project)
+
+        when:
+        def actual = provider.get()
+
+        then:
+        actual == value
+
+        where:
+        value << ["foobar", ""]
+    }
+
+    @Unroll
+    def "gets value #expected from integer provider"() {
+
+        given: "a property lookup"
+        def lookup = new PropertyLookup(input)
+
+        and: "a provider for it"
+        def provider = lookup.getIntegerValueProvider(project)
+
+        when:
+        def actual = provider.get()
+
+        then:
+        actual == expected
+
+        where:
+        input | expected
+        0     | 0
+        -42   | -42
+        42    | 42
+        "42"  | 42
+    }
+
+    enum SuperCoolEnum {
+        hot,
+        cold
+    }
+
+    @Unroll
+    def "gets enum value #expected from object provider"() {
+
+        given: "a property lookup"
+        def lookup = new PropertyLookup(input)
+
+        and: "a provider for it"
+        def provider = lookup.getObjectValueProvider(project).map({
+            SuperCoolEnum.valueOf(it.toString())
+        }
+        )
+
+        when:
+        def actual = provider.get()
+
+        then:
+        actual == expected
+
+        where:
+        input              | expected
+        "hot"              | SuperCoolEnum.hot
+        SuperCoolEnum.cold | SuperCoolEnum.cold
+    }
+
+    @Unroll
+    def "gets enum value #expected from generic provider"() {
+
+        given: "a property lookup"
+        def lookup = new PropertyLookup(input)
+
+        and: "a provider for it"
+        def provider = lookup.getValueProvider(project, { SuperCoolEnum.valueOf(it.toLowerCase()) })
+
+        when:
+        def actual = provider.get()
+
+        then:
+        actual == expected
+
+        where:
+        input              | expected
+        "hot"              | SuperCoolEnum.hot
+        "HOT"              | SuperCoolEnum.hot
+        SuperCoolEnum.cold | SuperCoolEnum.cold
     }
 
 }

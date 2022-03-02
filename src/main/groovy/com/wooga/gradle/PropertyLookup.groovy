@@ -25,7 +25,9 @@ import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 
+import javax.naming.spi.ObjectFactory
 import java.util.concurrent.Callable
+import java.util.function.Function
 
 
 /**
@@ -33,6 +35,10 @@ import java.util.concurrent.Callable
  * or a project's properties.
  */
 class PropertyLookup {
+
+    //------------------------------------------------------------------------/
+    // Properties
+    //------------------------------------------------------------------------/
     /**
      * Provided environment keys
      */
@@ -58,6 +64,9 @@ class PropertyLookup {
      */
     String prefix = ""
 
+    //------------------------------------------------------------------------/
+    // Constructors
+    //------------------------------------------------------------------------/
     /**
      * A lookup that has multiple environment and property keys
      */
@@ -104,6 +113,9 @@ class PropertyLookup {
         return new PropertyLookup(envKey, propertyKey, defaultValue)
     }
 
+    //------------------------------------------------------------------------/
+    // Values
+    //------------------------------------------------------------------------/
     /**
      * First, if a 'properties' map is provided (such as through a gradle.properties file), it will look for it there by key
      * Second, it will look in the environment (either provided or the one from the System) by a key
@@ -163,22 +175,92 @@ class PropertyLookup {
         return false
     }
 
+    Integer getValueAsInteger(Map<String, ?> properties, Map<String, ?> environment = null) {
+        Integer.parseInt(getValueAsString(properties, environment))
+    }
+
     String getValueAsString(Map<String, ?> properties, Map<String, ?> environment = null) {
         getValue(properties, environment) as String
     }
 
+    //------------------------------------------------------------------------/
+    // Providers
+    //------------------------------------------------------------------------/
+    /**
+     * @return A provider which returns an {@code Object}
+     */
+    Provider<Object> getObjectValueProvider(ProviderFactory factory, Map<String, ?> properties, Map<String, ?> env = null) {
+        factory.provider({
+            getValue(properties, env)
+        })
+    }
+
+    /**
+     * @return A provider which returns an {@code Object}
+     */
+    Provider<Object> getObjectValueProvider(Project project) {
+        project.provider({
+            getObjectValueProvider(project.providers, project.properties, System.getenv())
+        }).flatMap({ it })
+    }
+
+    /**
+     * @return A provider which returns a {@code String}
+     */
     Provider<String> getStringValueProvider(ProviderFactory factory, Map<String, ?> properties, Map<String, ?> env = null) {
         factory.provider({
             getValueAsString(properties, env)
         })
     }
 
+    /**
+     * @return A provider which returns a {@code String}
+     */
+    Provider<String> getStringValueProvider(Project project) {
+        project.provider({
+            getStringValueProvider(project.getProviders(), project.properties, System.getenv())
+        }).flatMap({ it })
+    }
+
+    /**
+     * @return A provider which returns a {@code Boolean}
+     */
     Provider<Boolean> getBooleanValueProvider(ProviderFactory factory, Map<String, ?> properties, Map<String, ?> env = null) {
         factory.provider({
             getValueAsBoolean(properties, env)
         })
     }
 
+    /**
+     * @return A provider which returns a {@code Boolean}
+     */
+    Provider<Boolean> getBooleanValueProvider(Project project) {
+        project.provider({
+            getBooleanValueProvider(project.getProviders(), project.properties, System.getenv())
+        }).flatMap({ it })
+    }
+
+    /**
+     * @return A provider which returns an {@code Integer}
+     */
+    Provider<Integer> getIntegerValueProvider(ProviderFactory factory, Map<String, ?> properties, Map<String, ?> env = null) {
+        factory.provider({
+            getValueAsInteger(properties, env)
+        })
+    }
+
+    /**
+     * @return A provider which returns an {@code Integer}
+     */
+    Provider<Integer> getIntegerValueProvider(Project project) {
+        project.provider({
+            getIntegerValueProvider(project.getProviders(), project.properties, System.getenv())
+        }).flatMap({ it })
+    }
+
+    /**
+     * @return A provider which returns a {@code RegularFile}
+     */
     Provider<RegularFile> getFileValueProvider(ProviderFactory factory, ProjectLayout layout, Map<String, ?> properties, Map<String, ?> env = null) {
         layout.buildDirectory.file(
                 factory.provider({
@@ -187,6 +269,18 @@ class PropertyLookup {
         )
     }
 
+    /**
+     * @return A provider which returns a {@code RegularFile}
+     */
+    Provider<RegularFile> getFileValueProvider(Project project) {
+        project.provider({
+            getFileValueProvider(project.providers, project.layout, project.properties, System.getenv())
+        }).flatMap({ it })
+    }
+
+    /**
+     * @return A provider which returns a {@code Directory}
+     */
     Provider<Directory> getDirectoryValueProvider(ProviderFactory factory, ProjectLayout layout, Map<String, ?> properties, Map<String, ?> env = null) {
         layout.buildDirectory.dir(
                 factory.provider({
@@ -195,36 +289,32 @@ class PropertyLookup {
         )
     }
 
-    Provider<String> getStringValueProvider(Project project) {
-        project.provider({
-            getStringValueProvider(project.getProviders(), project.properties, System.getenv())
-        }).flatMap({it})
-    }
-
-    Provider<Boolean> getBooleanValueProvider(Project project) {
-        project.provider ({
-            getBooleanValueProvider(project.getProviders(), project.properties, System.getenv())
-        }).flatMap({it})
-    }
-
-    Provider<RegularFile> getFileValueProvider(Project project) {
-        project.provider({
-            getFileValueProvider(project.providers, project.layout, project.properties, System.getenv())
-        }).flatMap({it})
-    }
-
+    /**
+     * @return A provider which returns a {@code Directory}
+     */
     Provider<Directory> getDirectoryValueProvider(Project project) {
-        project.provider( {
+        project.provider({
             getDirectoryValueProvider(project.providers, project.layout, project.properties, System.getenv())
-        }).flatMap({it})
+        }).flatMap({ it })
     }
 
-    static String envNameFromProperty(String extensionName, String property) {
-        "${extensionName.toUpperCase()}_${property.replaceAll(/([A-Z])/, "_\$1").toUpperCase()}"
+    /**
+     * @return A provider which returns an object of type {@code T} based on the given closure
+     */
+    public <T> Provider<T> getValueProvider(ProviderFactory factory, Map<String, ?> properties, Function<String, T> parseFunc, Map<String, ?> env = null) {
+        factory.provider({
+            def rawValue = getValue(properties, env).toString()
+            def value = parseFunc.apply(rawValue)
+            value
+        }) as Provider<T>
     }
 
-    static String convertPropertyToEnvName(String property) {
-        property.replaceAll(/([A-Z.])/, '_$1').replaceAll(/[.]/, '').toUpperCase()
+    /**
+     * @return A provider which returns an object of type {@code T} based on the given closure
+     */
+    public <T> Provider<T> getValueProvider(Project project, Function<String, T> parseFunc) {
+        project.provider({
+            getValueProvider(project.providers, project.properties, parseFunc, System.getenv())
+        }).flatMap({ it })
     }
-
 }
