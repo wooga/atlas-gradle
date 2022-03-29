@@ -219,4 +219,26 @@ class PropertyLookupProviderSpec extends ProjectSpec {
         SuperCoolEnum.cold | SuperCoolEnum.cold
     }
 
+    def "overrides default value set on property"() {
+
+        given: "a constructed lookup"
+        def lookup = new PropertyLookup(defaultValue)
+
+        when: "a generated provider"
+        def provider = lookup.getStringValueProvider(project)
+
+        then: "return the initial default value"
+        defaultValue == provider.get()
+
+        when: "overriding the default value"
+        lookup.defaultValue = newDefaultValue
+
+        then: "return the new default value"
+        newDefaultValue == provider.get()
+
+        where:
+        defaultValue = "FOO"
+        newDefaultValue = 'BAR'
+    }
+
 }

@@ -50,13 +50,20 @@ class PropertyLookup {
     /**
      * If it can't find the value from either environment or property map, it will return this one
      */
-    private final Object defaultValue
+    private Object defaultValue
 
     /**
      * @return The default value for this property
      */
     Object getDefaultValue() {
         extractValue(defaultValue)
+    }
+
+    /**
+     * Sets the default value for this property
+     */
+    void setDefaultValue(Object value) {
+        defaultValue = value
     }
 
     /**
@@ -127,9 +134,11 @@ class PropertyLookup {
     Object getValue(Map<String, ?> properties, Map<String, ?> environment = null) {
 
         // First, we look among properties
-        for (key in propertyKeys) {
-            if (properties.containsKey(key)) {
-                return extractValue(properties.get("${prefix}${key}".toString()))
+        if (properties != null) {
+            for (key in propertyKeys) {
+                if (properties.containsKey(key)) {
+                    return extractValue(properties.get("${prefix}${key}".toString()))
+                }
             }
         }
 
@@ -263,9 +272,9 @@ class PropertyLookup {
      */
     Provider<RegularFile> getFileValueProvider(ProviderFactory factory, ProjectLayout layout, Map<String, ?> properties, Map<String, ?> env = null) {
         layout.buildDirectory.file(
-                factory.provider({
-                    getValueAsString(properties, env)
-                })
+            factory.provider({
+                getValueAsString(properties, env)
+            })
         )
     }
 
@@ -283,9 +292,9 @@ class PropertyLookup {
      */
     Provider<Directory> getDirectoryValueProvider(ProviderFactory factory, ProjectLayout layout, Map<String, ?> properties, Map<String, ?> env = null) {
         layout.buildDirectory.dir(
-                factory.provider({
-                    getValueAsString(properties, env)
-                })
+            factory.provider({
+                getValueAsString(properties, env)
+            })
         )
     }
 
