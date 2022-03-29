@@ -187,4 +187,26 @@ class PropertyLookupProviderSpec extends ProjectSpec {
         newDefaultValue = 'BAR'
     }
 
+    @Unroll
+    def "gets enum value #expected from enum provider"() {
+
+        given: "a property lookup"
+        def lookup = new PropertyLookup(value)
+
+        and: "a provider for it"
+        def provider = lookup.getEnumValueProvider(project, SuperCoolEnum.class, defaultValue)
+
+        when:
+        def actual = provider.get()
+
+        then:
+        actual == expected
+
+        where:
+        value              | defaultValue      | expected
+        "hot"              | null              | SuperCoolEnum.hot
+        SuperCoolEnum.cold | null              | SuperCoolEnum.cold
+        "hot"              | "cold"            | SuperCoolEnum.cold
+        SuperCoolEnum.cold | SuperCoolEnum.hot | SuperCoolEnum.hot
+    }
 }
