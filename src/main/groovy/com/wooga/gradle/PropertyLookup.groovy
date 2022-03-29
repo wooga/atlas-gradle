@@ -323,4 +323,18 @@ class PropertyLookup {
             getValueProvider(project.providers, project.properties, parseFunc, System.getenv(), defaultValue)
         }).flatMap({ it })
     }
+
+    /**
+     * @return A provider which returns an enum of type {#code T}, casting from string when needed
+     */
+    public <T> Provider<T> getEnumValueProvider(Project project, Class<T> enumClass, Object defaultValue = null) {
+        if (!enumClass.enum){
+            throw new Exception("${enumClass} is not an enumeration type!")
+        }
+
+        getObjectValueProvider(project, defaultValue).map({
+            def enumValue = enumClass.invokeMethod("valueOf", it.toString())
+            enumValue
+        })  as Provider<T>
+    }
 }
