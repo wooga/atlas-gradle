@@ -131,7 +131,7 @@ class PropertyLookup {
      * @return The value of this property, by first looking it up in a hierarchy.
      *
      */
-    Object getValue(Map<String, ?> properties, Map<String, ?> environment = null) {
+    Object getValue(Map<String, ?> properties, Map<String, ?> environment = null, Object defaultValue = null) {
 
         // First, we look among properties
         if (properties != null) {
@@ -150,6 +150,11 @@ class PropertyLookup {
             }
         }
 
+        // If provided, return the given default value
+        if (defaultValue != null){
+            return defaultValue
+        }
+
         // Fallback to the provided default value
         getDefaultValue()
     }
@@ -166,16 +171,8 @@ class PropertyLookup {
         value
     }
 
-    Object getValue(Project project) {
-        getValue(project.properties, null)
-    }
-
-    Object getValue() {
-        getValue(null, null)
-    }
-
-    Boolean getValueAsBoolean(Map<String, ?> properties, Map<String, ?> env = null) {
-        def rawValue = getValue(properties, env)
+    Boolean getValueAsBoolean(Map<String, ?> properties, Map<String, ?> env = null, Object defaultValue = null) {
+        def rawValue = getValue(properties, env, defaultValue)
         if (rawValue) {
             rawValue = rawValue.toString().toLowerCase()
             rawValue = (rawValue == "1" || rawValue == "yes") ? "true" : rawValue
@@ -184,12 +181,12 @@ class PropertyLookup {
         return false
     }
 
-    Integer getValueAsInteger(Map<String, ?> properties, Map<String, ?> environment = null) {
-        Integer.parseInt(getValueAsString(properties, environment))
+    Integer getValueAsInteger(Map<String, ?> properties, Map<String, ?> environment = null, Object defaultValue = null) {
+        Integer.parseInt(getValueAsString(properties, environment, defaultValue))
     }
 
-    String getValueAsString(Map<String, ?> properties, Map<String, ?> environment = null) {
-        getValue(properties, environment) as String
+    String getValueAsString(Map<String, ?> properties, Map<String, ?> environment = null, Object defaultValue = null) {
+        getValue(properties, environment, defaultValue) as String
     }
 
     //------------------------------------------------------------------------/
@@ -198,82 +195,82 @@ class PropertyLookup {
     /**
      * @return A provider which returns an {@code Object}
      */
-    Provider<Object> getObjectValueProvider(ProviderFactory factory, Map<String, ?> properties, Map<String, ?> env = null) {
+    Provider<Object> getObjectValueProvider(ProviderFactory factory, Map<String, ?> properties, Map<String, ?> env = null, Object defaultValue = null) {
         factory.provider({
-            getValue(properties, env)
+            getValue(properties, env, defaultValue)
         })
     }
 
     /**
      * @return A provider which returns an {@code Object}
      */
-    Provider<Object> getObjectValueProvider(Project project) {
+    Provider<Object> getObjectValueProvider(Project project, Object defaultValue = null) {
         project.provider({
-            getObjectValueProvider(project.providers, project.properties, System.getenv())
+            getObjectValueProvider(project.providers, project.properties, System.getenv(), defaultValue)
         }).flatMap({ it })
     }
 
     /**
      * @return A provider which returns a {@code String}
      */
-    Provider<String> getStringValueProvider(ProviderFactory factory, Map<String, ?> properties, Map<String, ?> env = null) {
+    Provider<String> getStringValueProvider(ProviderFactory factory, Map<String, ?> properties, Map<String, ?> env = null, Object defaultValue = null) {
         factory.provider({
-            getValueAsString(properties, env)
+            getValueAsString(properties, env, defaultValue)
         })
     }
 
     /**
      * @return A provider which returns a {@code String}
      */
-    Provider<String> getStringValueProvider(Project project) {
+    Provider<String> getStringValueProvider(Project project, Object defaultValue = null) {
         project.provider({
-            getStringValueProvider(project.getProviders(), project.properties, System.getenv())
+            getStringValueProvider(project.getProviders(), project.properties, System.getenv(), defaultValue)
         }).flatMap({ it })
     }
 
     /**
      * @return A provider which returns a {@code Boolean}
      */
-    Provider<Boolean> getBooleanValueProvider(ProviderFactory factory, Map<String, ?> properties, Map<String, ?> env = null) {
+    Provider<Boolean> getBooleanValueProvider(ProviderFactory factory, Map<String, ?> properties, Map<String, ?> env = null, Object defaultValue = null) {
         factory.provider({
-            getValueAsBoolean(properties, env)
+            getValueAsBoolean(properties, env, defaultValue)
         })
     }
 
     /**
      * @return A provider which returns a {@code Boolean}
      */
-    Provider<Boolean> getBooleanValueProvider(Project project) {
+    Provider<Boolean> getBooleanValueProvider(Project project, Object defaultValue = null) {
         project.provider({
-            getBooleanValueProvider(project.getProviders(), project.properties, System.getenv())
+            getBooleanValueProvider(project.getProviders(), project.properties, System.getenv(), defaultValue)
         }).flatMap({ it })
     }
 
     /**
      * @return A provider which returns an {@code Integer}
      */
-    Provider<Integer> getIntegerValueProvider(ProviderFactory factory, Map<String, ?> properties, Map<String, ?> env = null) {
+    Provider<Integer> getIntegerValueProvider(ProviderFactory factory, Map<String, ?> properties, Map<String, ?> env = null, Object defaultValue = null) {
         factory.provider({
-            getValueAsInteger(properties, env)
+            getValueAsInteger(properties, env, defaultValue)
         })
     }
 
     /**
      * @return A provider which returns an {@code Integer}
      */
-    Provider<Integer> getIntegerValueProvider(Project project) {
+    Provider<Integer> getIntegerValueProvider(Project project, Object defaultValue = null) {
         project.provider({
-            getIntegerValueProvider(project.getProviders(), project.properties, System.getenv())
+            getIntegerValueProvider(project.getProviders(), project.properties, System.getenv(), defaultValue)
         }).flatMap({ it })
     }
 
     /**
      * @return A provider which returns a {@code RegularFile}
      */
-    Provider<RegularFile> getFileValueProvider(ProviderFactory factory, ProjectLayout layout, Map<String, ?> properties, Map<String, ?> env = null) {
+    Provider<RegularFile> getFileValueProvider(ProviderFactory factory, ProjectLayout layout, Map<String, ?> properties, Map<String, ?> env = null, Object defaultValue = null) {
         layout.buildDirectory.file(
             factory.provider({
-                getValueAsString(properties, env)
+                getValueAsString(properties, env, defaultValue)
             })
         )
     }
@@ -281,19 +278,19 @@ class PropertyLookup {
     /**
      * @return A provider which returns a {@code RegularFile}
      */
-    Provider<RegularFile> getFileValueProvider(Project project) {
+    Provider<RegularFile> getFileValueProvider(Project project, Object defaultValue = null) {
         project.provider({
-            getFileValueProvider(project.providers, project.layout, project.properties, System.getenv())
+            getFileValueProvider(project.providers, project.layout, project.properties, System.getenv(), defaultValue)
         }).flatMap({ it })
     }
 
     /**
      * @return A provider which returns a {@code Directory}
      */
-    Provider<Directory> getDirectoryValueProvider(ProviderFactory factory, ProjectLayout layout, Map<String, ?> properties, Map<String, ?> env = null) {
+    Provider<Directory> getDirectoryValueProvider(ProviderFactory factory, ProjectLayout layout, Map<String, ?> properties, Map<String, ?> env = null, Object defaultValue = null) {
         layout.buildDirectory.dir(
             factory.provider({
-                getValueAsString(properties, env)
+                getValueAsString(properties, env, defaultValue)
             })
         )
     }
@@ -301,18 +298,18 @@ class PropertyLookup {
     /**
      * @return A provider which returns a {@code Directory}
      */
-    Provider<Directory> getDirectoryValueProvider(Project project) {
+    Provider<Directory> getDirectoryValueProvider(Project project, Object defaultValue = null) {
         project.provider({
-            getDirectoryValueProvider(project.providers, project.layout, project.properties, System.getenv())
+            getDirectoryValueProvider(project.providers, project.layout, project.properties, System.getenv(), defaultValue)
         }).flatMap({ it })
     }
 
     /**
      * @return A provider which returns an object of type {@code T} based on the given closure
      */
-    public <T> Provider<T> getValueProvider(ProviderFactory factory, Map<String, ?> properties, Function<String, T> parseFunc, Map<String, ?> env = null) {
+    public <T> Provider<T> getValueProvider(ProviderFactory factory, Map<String, ?> properties, Function<String, T> parseFunc, Map<String, ?> env = null, Object defaultValue = null) {
         factory.provider({
-            def rawValue = getValue(properties, env).toString()
+            def rawValue = getValue(properties, env, defaultValue).toString()
             def value = parseFunc.apply(rawValue)
             value
         }) as Provider<T>
@@ -321,9 +318,9 @@ class PropertyLookup {
     /**
      * @return A provider which returns an object of type {@code T} based on the given closure
      */
-    public <T> Provider<T> getValueProvider(Project project, Function<String, T> parseFunc) {
+    public <T> Provider<T> getValueProvider(Project project, Function<String, T> parseFunc, Object defaultValue = null) {
         project.provider({
-            getValueProvider(project.providers, project.properties, parseFunc, System.getenv())
+            getValueProvider(project.providers, project.properties, parseFunc, System.getenv(), defaultValue)
         }).flatMap({ it })
     }
 }
