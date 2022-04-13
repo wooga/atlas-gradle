@@ -92,8 +92,8 @@ class ArgumentsSpecTest extends MockTaskIntegrationSpec<ArgumentsUsingTask> {
         }
 
         and: "a test value in system env"
-        initialValue.each { key, value ->
-            environmentVariables.set(key, value)
+        initialValue.each { key, v ->
+            environmentVariables.set(key, v)
         }
 
         and: "an initial environment"
@@ -141,8 +141,8 @@ class ArgumentsSpecTest extends MockTaskIntegrationSpec<ArgumentsUsingTask> {
         appendToSubjectTask("setEnvironmentDefaults()")
 
         and: "a test value in system env"
-        initialValue.each { key, value ->
-            environmentVariables.set(key, value)
+        initialValue.each { key, v ->
+            environmentVariables.set(key, v)
         }
 
         appendToSubjectTask("$method(${wrapValueBasedOnType(rawValue, Map)})")
