@@ -103,5 +103,19 @@ class PropertyLookupSpec extends Specification {
         props = ["bread.ham": 7]
         env = ["BREAD_HAM": 7]
     }
+
+    def "gets default value"() {
+        given: "a property lookup"
+        def lookup = new PropertyLookup(propertyValue)
+
+        when:
+        def actual = lookup.getValue()
+
+        then:
+        actual == propertyValue
+
+        where:
+        propertyValue = "bar"
+    }
 }
 

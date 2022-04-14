@@ -209,4 +209,23 @@ class PropertyLookupProviderSpec extends ProjectSpec {
         "hot"              | "cold"            | SuperCoolEnum.cold
         SuperCoolEnum.cold | SuperCoolEnum.hot | SuperCoolEnum.hot
     }
+
+
+    def "gets property value from project's properties"() {
+        given: "a property lookup"
+        def lookup = new PropertyLookup(null, propertyKey, null)
+
+        and: "a value in the project"
+        project.extensions.add(propertyKey, propertyValue)
+
+        when:
+        def actual = lookup.getValue(project)
+
+        then:
+        actual == propertyValue
+
+        where:
+        propertyKey | propertyValue
+        "foo"       | "bar"
+    }
 }

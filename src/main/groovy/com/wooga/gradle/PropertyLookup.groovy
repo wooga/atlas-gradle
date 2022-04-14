@@ -159,6 +159,14 @@ class PropertyLookup {
         getDefaultValue()
     }
 
+    Object getValue(Project project) {
+        getValue(project.properties, null)
+    }
+
+    Object getValue() {
+        getValue(null, null)
+    }
+
     private static Object extractValue(Object value) {
         if (value == null) {
             return null
