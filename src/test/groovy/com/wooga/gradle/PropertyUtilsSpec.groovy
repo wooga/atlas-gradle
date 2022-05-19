@@ -81,8 +81,6 @@ class PropertyUtilsSpec extends Specification {
         "foo"         | "setFoo"
         "foo.bar"     | "foo.setBar"
         "foo.bar.baz" | "foo.bar.setBaz"
-
     }
-
-
 }
+
