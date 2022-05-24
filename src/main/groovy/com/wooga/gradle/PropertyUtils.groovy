@@ -16,7 +16,7 @@ class PropertyUtils {
      * @return A generated environment key based from the property path
      */
     static String envNameFromProperty(String property) {
-        property.replaceAll(/([A-Z.])/, '_$1').replaceAll(/[.]/, '').toUpperCase()
+        property.replaceAll(/([A-Z.]|[0-9]+)/, '_$1').replaceAll(/[.]/, '').toUpperCase()
     }
 
     /**
@@ -24,7 +24,7 @@ class PropertyUtils {
      * @return A string, in camel case. (helloThereBrownCow)
      */
     static String toCamelCase(String input) {
-        input.replaceAll(/\(\)/,"").replaceAll(/((\/|-|_|\.)+)([\w])/, { all, delimiterAll, delimiter, firstAfter -> "${firstAfter.toUpperCase()}" })
+        input.replaceAll(/\(\)/,"").toLowerCase().replaceAll(/((\/|-|_|\.)+)([\w])/, { all, delimiterAll, delimiter, firstAfter -> "${firstAfter.toUpperCase()}" })
     }
 
     /**
