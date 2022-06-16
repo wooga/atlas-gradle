@@ -1,6 +1,10 @@
 package com.wooga.gradle
 
+import com.wooga.gradle.test.IntegrationSpec
 import nebula.test.ProjectSpec
+import org.gradle.api.file.Directory
+import org.gradle.api.file.RegularFile
+import org.gradle.api.provider.Provider
 import spock.lang.Unroll
 
 class PropertyLookupProviderSpec extends ProjectSpec {
@@ -227,5 +231,46 @@ class PropertyLookupProviderSpec extends ProjectSpec {
         where:
         propertyKey | propertyValue
         "foo"       | "bar"
+    }
+
+    @Unroll
+    def "generates correct provider of type #type with value #value from lookup when set"() {
+        given: "a property lookup"
+        def lookup = new PropertyLookup(null, propertyKey, null)
+            .of(type)
+
+        and: "a value in the project"
+        project.extensions.add(propertyKey, value)
+
+        and: "a generated provider"
+        def provider = lookup.getDefaultProvider(project)
+        assert provider != null
+        assert value == lookup.getValue(project)
+
+        when:
+        Object expected = value
+        Object actual
+        if (type == File || type == RegularFile) {
+            actual = ((Provider<RegularFile>) provider).get().asFile.path
+        } else if (type == Directory) {
+            actual = ((Provider<Directory>) provider).get().asFile.path
+        } else {
+            actual = provider.get()
+        }
+
+        then:
+        actual == expected
+
+        where:
+        type        | value
+        String      | "foobar"
+        Integer     | 24
+        Boolean     | true
+        Boolean     | false
+        File        | IntegrationSpec.osPath("/foobar.txt")
+        RegularFile | IntegrationSpec.osPath("/foobar.txt")
+        Directory   | IntegrationSpec.osPath("/foo/bar")
+
+        propertyKey = "pancakes"
     }
 }

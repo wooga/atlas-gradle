@@ -45,6 +45,7 @@ class PropertyLookup {
      * Provided property keys
      */
     final List<String> propertyKeys
+
     /**
      * If it can't find the value from either environment or property map, it will return this one
      */
@@ -63,6 +64,12 @@ class PropertyLookup {
     void setDefaultValue(Object value) {
         defaultValue = value
     }
+
+    /**
+     * If set, defines what the object type for this property is.
+     * (Used while generating providers)
+     */
+    Class type
 
     /**
      * If set, a prefix to apply to all keys during lookup
@@ -375,5 +382,44 @@ class PropertyLookup {
         getAll(type).collect {
             it.propertyKeys as List<String>
         }.flatten() as List<String>
+    }
+
+    //------------------------------------------------------------------------/
+    // Provider Support
+    //------------------------------------------------------------------------/
+    /**
+     * Defines the type of object this lookup is for (used when generating providers)
+     * @param type The type of object for the Provider<T>
+     */
+    PropertyLookup of(Class type) {
+        this.type = type
+        this
+    }
+
+    /**
+     * @return The default provider for this property, if the object type has been previously defined
+     */
+    Provider getDefaultProvider(Project project, Object defaultValue = null) {
+        switch (type) {
+            case String:
+                return getStringValueProvider(project, defaultValue)
+            case Integer:
+                return getIntegerValueProvider(project, defaultValue)
+            case Boolean:
+                return getBooleanValueProvider(project, defaultValue)
+            case File:
+            case RegularFile:
+                return getFileValueProvider(project, defaultValue)
+            case Directory:
+                return getDirectoryValueProvider(project, defaultValue)
+        }
+        null
+    }
+
+    /**
+     * @return True if this lookup can generate a default provider
+     */
+    Boolean getHasDefaultProvider(){
+        type != null
     }
 }
