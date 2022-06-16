@@ -18,14 +18,12 @@ package com.wooga.gradle
 
 
 import org.gradle.api.Project
-import org.gradle.api.Transformer
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 
-import javax.naming.spi.ObjectFactory
 import java.util.concurrent.Callable
 import java.util.function.Function
 
@@ -151,7 +149,7 @@ class PropertyLookup {
         }
 
         // If provided, return the given default value
-        if (defaultValue != null){
+        if (defaultValue != null) {
             return defaultValue
         }
 
@@ -336,13 +334,46 @@ class PropertyLookup {
      * @return A provider which returns an enum of type {#code T}, casting from string when needed
      */
     public <T> Provider<T> getEnumValueProvider(Project project, Class<T> enumClass, Object defaultValue = null) {
-        if (!enumClass.enum){
+        if (!enumClass.enum) {
             throw new Exception("${enumClass} is not an enumeration type!")
         }
 
         getObjectValueProvider(project, defaultValue).map({
             def enumValue = enumClass.invokeMethod("valueOf", it.toString())
             enumValue
-        })  as Provider<T>
+        }) as Provider<T>
+    }
+
+    //------------------------------------------------------------------------/
+    // Static Utilities
+    //------------------------------------------------------------------------/
+    /**
+     * @return All the property lookups declared in the given class
+     */
+    static List<PropertyLookup> getAll(Class type) {
+        type.declaredFields.findAll({ it.type == PropertyLookup }).collect({
+            it.setAccessible(true)
+            def convention = (PropertyLookup) it.get()
+            it.setAccessible(false)
+            convention
+        })
+    }
+
+    /**
+     * @return All the environment variables (by their keys) declared by the given class
+     */
+    static List<String> getEnvironmentVariables(Class type) {
+        getAll(type).collect {
+            it.environmentKeys as List<String>
+        }.flatten() as List<String>
+    }
+
+    /**
+     * @return All the properties (by their keys) declared by the given class
+     */
+    static List<String> getProperties(Class type) {
+        getAll(type).collect {
+            it.propertyKeys as List<String>
+        }.flatten() as List<String>
     }
 }

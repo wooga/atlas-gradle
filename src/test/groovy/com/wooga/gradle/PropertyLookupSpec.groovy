@@ -1,14 +1,6 @@
 package com.wooga.gradle
 
-import com.wooga.gradle.io.LogFileSpec
-import com.wooga.gradle.io.OutputStreamSpec
-import com.wooga.gradle.test.PropertyQueryTaskWriter
-import nebula.test.ProjectSpec
-import org.gradle.api.Action
-import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.TaskAction
-import org.gradle.process.ExecResult
-import org.gradle.process.ExecSpec
+
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -116,6 +108,33 @@ class PropertyLookupSpec extends Specification {
 
         where:
         propertyValue = "bar"
+    }
+
+    def "gets all property lookups from mock conventions class"() {
+        when:
+        def lookups = PropertyLookup.getAll(MockConventions)
+
+        then:
+        lookups.size() == 3
+        lookups.containsAll(MockConventions.name, MockConventions.version, MockConventions.directory)
+    }
+
+    def "gets all environment variables from mock conventions class"() {
+        when:
+        def envVars = PropertyLookup.getEnvironmentVariables(MockConventions)
+
+        then:
+        envVars.size() == 3
+        envVars.containsAll("MOCK_NAME", "MOCK_VERSION", "MOCK_DIR")
+    }
+
+    def "gets all properties from mock conventions class"() {
+        when:
+        def properties = PropertyLookup.getProperties(MockConventions)
+
+        then:
+        properties.size() == 3
+        properties.containsAll("mock.name", "mock.version", "mock.dir")
     }
 }
 
