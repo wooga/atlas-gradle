@@ -112,7 +112,6 @@ abstract class MockTaskIntegrationSpec<T extends MockTask> extends MockIntegrati
 class MockPlugin implements Plugin<Project> {
 
     static final String extensionName = "commons"
-    static final String taskName = "mock"
 
     @Override
     void apply(Project project) {
@@ -125,6 +124,26 @@ class MockPlugin implements Plugin<Project> {
 class MockExtension {
 }
 
-class MockTask extends DefaultTask {
+class MockConventions {
+
+    static final PropertyLookup name = new PropertyLookup(
+        "MOCK_NAME",
+        "mock.name",
+        "foobar"
+    )
+
+    static final PropertyLookup version = new PropertyLookup(
+        "MOCK_VERSION",
+        "mock.version",
+        "latest"
+    )
+
+    static final PropertyLookup directory = new PropertyLookup(
+        "MOCK_DIR",
+        "mock.dir",
+        null
+    )
 }
 
+class MockTask extends DefaultTask {
+}
