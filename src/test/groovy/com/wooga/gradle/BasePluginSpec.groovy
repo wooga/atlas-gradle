@@ -5,20 +5,11 @@ import nebula.test.ProjectSpec
 import org.apache.tools.ant.Project
 
 class MockBasePlugin extends BasePlugin<MockConventions> {
-
 }
 
 class BasePluginSpec extends ProjectSpec {
 
-    String getPluginName() {
-        "mock_plugin"
-    }
-
     def 'creates the plugin'() {
-        given:
-        assert !project.plugins.hasPlugin(pluginName)
-        assert !project.extensions.findByName(MockPlugin.extensionName)
-
         when:
         def plugin = project.plugins.apply(MockBasePlugin)
 

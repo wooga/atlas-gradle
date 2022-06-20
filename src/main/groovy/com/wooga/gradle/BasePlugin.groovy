@@ -2,6 +2,7 @@ package com.wooga.gradle
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.internal.impldep.com.sun.xml.bind.v2.schemagen.xmlschema.Annotated
 
 import java.lang.reflect.ParameterizedType
 
@@ -37,3 +38,4 @@ abstract class BasePlugin<TConvention> implements Plugin<Project> {
         PropertyLookup.getEnvironmentVariables(conventionClass)
     }
 }
+
