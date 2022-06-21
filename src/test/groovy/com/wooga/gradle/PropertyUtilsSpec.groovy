@@ -1,5 +1,6 @@
 package com.wooga.gradle
 
+import nebula.test.ProjectSpec
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -81,6 +82,28 @@ class PropertyUtilsSpec extends Specification {
         "foo"         | "setFoo"
         "foo.bar"     | "foo.setBar"
         "foo.bar.baz" | "foo.bar.setBaz"
+    }
+}
+
+class PropertyUtilsIntegrationSpec extends ProjectSpec {
+
+    @Unroll
+    def "file path '#input' is normalized to '#expected'"() {
+
+        when:
+        if (rootDirectory == "#PROJECT") {
+            rootDirectory = projectDir.path
+        }
+        def actual = PlatformUtils.normalizePath(input, rootDirectory)
+
+        then:
+        expected == actual
+
+        where:
+        input      | rootDirectory | expected
+        "/foo/bar" | null          | (PlatformUtils.windows ? new File(PlatformUtils.diskVolume, "foo/bar").path : input)
+        "foo/bar"  | null          | new File("foo/bar").path
+        "foo/bar"  | "#PROJECT"    | input
     }
 }
 
