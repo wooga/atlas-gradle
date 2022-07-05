@@ -68,30 +68,20 @@ trait OutputStreamSpec extends BaseSpec {
     OutputStream getStream(File logFile, OutputStream stream, Action<OutputStreamConfiguration> configure = null) {
         OutputStream result
         if (logFile || stream) {
+            OutputStreamConfiguration configuration = new OutputStreamConfiguration()
+            if (configure != null) {
+                configure.execute(configuration)
+            }
             // Construct the handler
             TextStream handler = new ForkTextStream()
-            String lineSeparator = SystemProperties.getInstance().getLineSeparator()
-            result = new LineBufferingOutputStream(handler, lineSeparator)
 
             // Optionally, write to log file
             if (logFile) {
-                // Use
-                handler.addWriter(logFile.newPrintWriter())
+                handler.addWriter(configuration.transformLogWriter.apply(logFile.newPrintWriter()))
             }
 
             if (stream) {
-                Writer streamWriter = stream.newPrintWriter()
-                if (configure != null) {
-
-                    OutputStreamConfiguration configuration = new OutputStreamConfiguration()
-                    configure.execute(configuration)
-
-                    if (configuration.transformStreamWriter != null) {
-                        streamWriter = configuration.transformStreamWriter.apply(streamWriter)
-                    }
-
-                }
-                handler.addWriter(streamWriter)
+                handler.addWriter(configuration.transformStreamWriter.apply(stream.newPrintWriter()))
             }
         }
         // Else if we are discarding the output
@@ -103,10 +93,29 @@ trait OutputStreamSpec extends BaseSpec {
 }
 
 class OutputStreamConfiguration {
-    Function<Writer, Writer> transformStreamWriter
+    Function<Writer, Writer> transformStreamWriter = { it }
+    Function<Writer, Writer> transformLogWriter = { it }
 
-    OutputStreamConfiguration withStreamWriter(@ClosureParams(value= FromString.class, options="java.io.Writer") Closure<Writer> func) {
+    Function<TextStream, OutputStream> outputStreamFunction = { TextStream s -> new LineBufferingOutputStream(s, SystemProperties.instance.lineSeparator)}
+
+    OutputStreamConfiguration withOutput(@ClosureParams(value = FromString.class, options = "com.wooga.gradle.io.TextStream") Closure<OutputStream> func) {
+        outputStreamFunction = func
+        this
+    }
+
+    OutputStreamConfiguration withStreamWriter(@ClosureParams(value = FromString.class, options = "java.io.Writer") Closure<Writer> func) {
         transformStreamWriter = func
+        this
+    }
+
+    OutputStreamConfiguration withLogWriter(@ClosureParams(value = FromString.class, options = "java.io.Writer") Closure<Writer> func) {
+        transformLogWriter = func
+        this
+    }
+
+    OutputStreamConfiguration withWriter(@ClosureParams(value = FromString.class, options = "java.io.Writer") Closure<Writer> func) {
+        transformStreamWriter = func
+        transformLogWriter = func
         this
     }
 }
