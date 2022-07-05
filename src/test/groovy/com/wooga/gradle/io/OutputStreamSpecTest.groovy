@@ -47,7 +47,7 @@ class OutputStreamTask extends MockTask implements LogFileSpec, OutputStreamSpec
                     ignoreExitValue = true
                     standardOutput = getStandardOutputStream(_logFile, { OutputStreamConfiguration cfg ->
                         if (modifyOutput.present && modifyOutput.get()) {
-                            cfg.withStreamWriter({ wr ->
+                            cfg.withWriter({ wr ->
                                 new MockWriter(wr).newPrintWriter()
                             })
                         }
@@ -93,10 +93,10 @@ class OutputStreamSpecTest extends MockTaskIntegrationSpec<OutputStreamTask> {
 
     def "can modify the output stream"() {
         given:
-        File mockFile = file("foobar")
+        File logFile = file("foobar")
         appendToSubjectTask("""
         modifyOutput.set(true)
-        logFile=${wrapValueBasedOnType(mockFile.path, File)}
+        logFile=${wrapValueBasedOnType(logFile.path, File)}
         logToStdout=true
         """)
 
@@ -106,6 +106,8 @@ class OutputStreamSpecTest extends MockTaskIntegrationSpec<OutputStreamTask> {
         then:
         result.success
         result.standardOutput.contains(OutputStreamTask.text.toUpperCase())
+        logFile.exists()
+        logFile.text.contains(OutputStreamTask.text.toUpperCase())
 
     }
 }

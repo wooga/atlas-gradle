@@ -11,7 +11,7 @@ import org.gradle.internal.SystemProperties
 import java.util.function.Function
 
 /**
- * Generates an output stream
+ * Generates an {@link OutputStream}
  */
 trait OutputStreamSpec extends BaseSpec {
 
@@ -67,13 +67,18 @@ trait OutputStreamSpec extends BaseSpec {
      */
     OutputStream getStream(File logFile, OutputStream stream, Action<OutputStreamConfiguration> configure = null) {
         OutputStream result
+
+        // If there is a valid stream to be created
         if (logFile || stream) {
+
             OutputStreamConfiguration configuration = new OutputStreamConfiguration()
             if (configure != null) {
                 configure.execute(configuration)
             }
+
             // Construct the handler
             TextStream handler = new ForkTextStream()
+            result = configuration.outputStreamFunction.apply(handler)
 
             // Optionally, write to log file
             if (logFile) {
@@ -88,31 +93,47 @@ trait OutputStreamSpec extends BaseSpec {
         else {
             result = new ByteArrayOutputStream()
         }
-        return result
+
+        result
     }
 }
 
+/**
+ * Provides configuration during the generation of an {@link OutputStream} by the {@link OutputStreamSpec}
+ */
 class OutputStreamConfiguration {
+
+    Function<TextStream, OutputStream> outputStreamFunction = { TextStream s -> new LineBufferingOutputStream(s, SystemProperties.instance.lineSeparator)}
     Function<Writer, Writer> transformStreamWriter = { it }
     Function<Writer, Writer> transformLogWriter = { it }
 
-    Function<TextStream, OutputStream> outputStreamFunction = { TextStream s -> new LineBufferingOutputStream(s, SystemProperties.instance.lineSeparator)}
-
+    /**
+     * Sets a function to generate the output stream from the given handler
+     */
     OutputStreamConfiguration withOutput(@ClosureParams(value = FromString.class, options = "com.wooga.gradle.io.TextStream") Closure<OutputStream> func) {
         outputStreamFunction = func
         this
     }
 
+    /**
+     * Sets the writer used for standard out/err
+     */
     OutputStreamConfiguration withStreamWriter(@ClosureParams(value = FromString.class, options = "java.io.Writer") Closure<Writer> func) {
         transformStreamWriter = func
         this
     }
 
+    /**
+     * Sets the writer used for log files
+     */
     OutputStreamConfiguration withLogWriter(@ClosureParams(value = FromString.class, options = "java.io.Writer") Closure<Writer> func) {
         transformLogWriter = func
         this
     }
 
+    /**
+     * Sets all writers
+     */
     OutputStreamConfiguration withWriter(@ClosureParams(value = FromString.class, options = "java.io.Writer") Closure<Writer> func) {
         transformStreamWriter = func
         transformLogWriter = func
