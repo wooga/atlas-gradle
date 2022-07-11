@@ -99,7 +99,7 @@ abstract class MockTaskIntegrationSpec<T extends MockTask> extends MockIntegrati
         runTasksSuccessfully(subjectUnderTestName)
     }
 
-    void addTask(String name, String typeName, Boolean force, String... lines) {
+    String addTask(String name, String typeName, Boolean force, String... lines) {
         lines = lines ?: []
         buildFile << """
         task (${name}, type: ${typeName}) {                       

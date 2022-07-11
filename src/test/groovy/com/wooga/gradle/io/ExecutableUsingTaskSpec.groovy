@@ -8,7 +8,7 @@ import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecResult
 
-class ExecutableUsingTask extends MockTask implements BaseSpec, LogFileSpec, OutputStreamSpecExtended {
+class ExecutableUsingTask extends MockTask implements BaseSpec, LogFileSpec, ProcessOutputSpec {
 
     @Nested
     public final Executable foo = objects.newInstance(Executable)
@@ -49,8 +49,8 @@ class ExecutableUsingTaskSpec extends MockTaskIntegrationSpec<ExecutableUsingTas
         def bar = generateBatchWrapper("bar_exec", false)
 
         and: "them being set onto the task"
-        appendToSubjectTask("foo.setExecutableByFile(${wrapValueBasedOnType(foo.path, File)})")
-        appendToSubjectTask("bar.setExecutableByFile(${wrapValueBasedOnType(bar.path, File)})")
+        appendToSubjectTask("foo.setExecutable(${wrapValueBasedOnType(foo.path, File)})")
+        appendToSubjectTask("bar.setExecutable(${wrapValueBasedOnType(bar.path, File)})")
 
         and: "additional arguments being set for each"
         appendToSubjectTask("foo.setAdditionalArguments(${wrapValueBasedOnType(fooArgs, String)})")

@@ -129,7 +129,7 @@ class ProcessExecutor {
      * @param standardOutput The file to write standard output to
      * @param standardError The file to write standard error output to
      */
-    ProcessExecutor withOutput(OutputStreamSpecExtended spec, File standardOutput, File standardError, Action<OutputStreamConfiguration> configure = null) {
+    ProcessExecutor withOutput(ProcessOutputSpec spec, File standardOutput, File standardError, Action<ProcessOutputConfiguration> configure = null) {
         if (standardOutput != null) {
             FileUtils.ensureFile(standardOutput)
             withStandardOutput(spec.getStandardOutputStream(standardOutput, configure))
@@ -146,7 +146,7 @@ class ProcessExecutor {
      * @param spec A trait for generating an output stream
      * @param file The file to write standard output and standard error to
      */
-    ProcessExecutor withOutput(OutputStreamSpecExtended spec, File file, Action<OutputStreamConfiguration> configure = null) {
+    ProcessExecutor withOutput(ProcessOutputSpec spec, File file, Action<ProcessOutputConfiguration> configure = null) {
         withOutput(spec, file, file, configure)
     }
 
@@ -156,10 +156,10 @@ class ProcessExecutor {
      * @param stdout A trait for setting a log file
      * @param standardError Whether to write standard error to the log file
      */
-    ProcessExecutor withOutputLogFile(OutputStreamSpecExtended outputStreamSpec,
+    ProcessExecutor withOutputLogFile(ProcessOutputSpec outputStreamSpec,
                                       LogFileSpec stdout,
                                       LogFileSpec stderr,
-                                      Action<OutputStreamConfiguration> configure = null) {
+                                      Action<ProcessOutputConfiguration> configure = null) {
         withOutput(outputStreamSpec,
             stdout.logFile.asFile.getOrNull(),
             stderr.logFile.asFile.getOrNull(),
@@ -171,9 +171,9 @@ class ProcessExecutor {
      * @param outputStreamSpec A trait for generating an output stream
      * @param logFile A trait containing a log file
      */
-    ProcessExecutor withOutputLogFile(OutputStreamSpecExtended outputStreamSpec,
+    ProcessExecutor withOutputLogFile(ProcessOutputSpec outputStreamSpec,
                                       LogFileSpec logFile,
-                                      Action<OutputStreamConfiguration> configure = null) {
+                                      Action<ProcessOutputConfiguration> configure = null) {
         withOutputLogFile(outputStreamSpec,
             logFile,
             logFile,

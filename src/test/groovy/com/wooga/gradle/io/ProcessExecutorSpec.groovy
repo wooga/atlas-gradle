@@ -44,7 +44,7 @@ class ProcessExecutorTaskSpec extends ProjectSpec {
         ["foo", "bar"] | null
     }
 
-    static class MockOutput implements OutputStreamSpecExtended {
+    static class MockOutput implements ProcessOutputSpec {
     }
 
     def "can write to stdout"() {

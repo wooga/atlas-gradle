@@ -3,9 +3,8 @@ package com.wooga.gradle.io
 import com.wooga.gradle.ArgumentsSpec
 import com.wooga.gradle.MockTask
 import com.wooga.gradle.MockTaskIntegrationSpec
+import com.wooga.gradle.PlatformUtils
 import com.wooga.gradle.test.BatchmodeWrapper
-import com.wooga.gradle.test.PropertyQueryTaskWriter
-import com.wooga.gradle.test.queries.TestValue
 import com.wooga.gradle.test.writers.PropertyGetterTaskWriter
 import com.wooga.gradle.test.writers.PropertySetterWriter
 import org.gradle.api.tasks.Nested
@@ -13,7 +12,9 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecResult
 import spock.lang.Unroll
 
-class ExecSpecImplTask extends MockTask implements ExecSpec, ArgumentsSpec, OutputStreamSpecExtended {
+import static com.wooga.gradle.test.queries.TestValue.projectFile
+
+class ExecSpecImplTask extends MockTask implements ExecSpec, ArgumentsSpec, ProcessOutputSpec {
 
     @Nested
     LogFile stdoutFile = objects.newInstance(LogFile)
@@ -23,14 +24,21 @@ class ExecSpecImplTask extends MockTask implements ExecSpec, ArgumentsSpec, Outp
     @TaskAction
     void run() {
         ExecResult execResult = ProcessExecutor.from(this)
-            .withArguments(this)
-            .withOutputLogFile(this, stdoutFile, stderrFile)
-            .execute()
+                .withArguments(this)
+                .withOutputLogFile(this, stdoutFile, stderrFile)
+                .execute()
         execResult.assertNormalExitValue()
     }
 }
 
 class ExecSpecImplTaskIntegrationSpec extends MockTaskIntegrationSpec<ExecSpecImplTask> {
+
+    static Boolean compareCaseInsensitive(String value, String expectedValue) {
+        if ((value == null && expectedValue != null) || (value != null && expectedValue == null)) {
+            return false
+        }
+        value.toLowerCase() == expectedValue.toLowerCase()
+    }
 
     @Unroll
     def "can set value #rawValue of type #type with method #method expecting path #expectedPath, name #expectedName and directory #expectedDirectory"() {
@@ -46,31 +54,47 @@ class ExecSpecImplTaskIntegrationSpec extends MockTaskIntegrationSpec<ExecSpecIm
         """.stripIndent()
 
         when:
-        def filePathQuery = new PropertyQueryTaskWriter("${path}.executable")
-        filePathQuery.write(buildFile)
-        def nameQuery = new PropertyQueryTaskWriter("${path}.executableName")
-        nameQuery.write(buildFile)
-        def directoryQueryWriter = new PropertyGetterTaskWriter("${path}.executableDirectory")
-        directoryQueryWriter.write(buildFile)
+        def filePathGet = new PropertyGetterTaskWriter("${path}.executable")
+        def nameGet = new PropertyGetterTaskWriter("${path}.executableName")
+        def directoryGet = new PropertyGetterTaskWriter("${path}.executableDirectory")
 
-        def result = runTasksSuccessfully(filePathQuery.taskName, nameQuery.taskName, directoryQueryWriter.taskName)
+        filePathGet.write(buildFile)
+        nameGet.write(buildFile)
+        directoryGet.write(buildFile)
+
+        def result = runTasksSuccessfully(filePathGet.taskName, nameGet.taskName, directoryGet.taskName)
 
         then:
-        filePathQuery.matches(result, expectedPath)
-        nameQuery.matches(result, expectedName)
-        def directoryQuery = directoryQueryWriter.generateQuery(this, result)
-        directoryQuery.matches(expectedDirectory)
+        def filePathQuery = filePathGet.generateQuery(this, result)
+        if (PlatformUtils.windows) {
+            compareCaseInsensitive(filePathQuery.getValue(), expectedPath)
+        } else {
+            filePathQuery.matches(expectedPath)
+        }
+        nameGet.generateQuery(this, result).matches(expectedName)
+
+        def directoryQuery = directoryGet.generateQuery(this, result)
+        if (PlatformUtils.windows) {
+            compareCaseInsensitive(directoryQuery.getValue(), expectedDirectory as String)
+        } else {
+            directoryQuery.matches(expectedDirectory)
+        }
 
         where:
-        method                       | type                    | rawValue              | expectedPath          | expectedName | expectedDirectory
-        "setExecutableByPath"        | "String"                | "foobar"              | "foobar"              | "foobar"     | null
-        "setExecutableByPath"        | "Provider<String>"      | "foobar"              | "foobar"              | "foobar"     | null
-        "setExecutableByFile"        | "File"                  | osPath("/bin/foobar") | osPath("/bin/foobar") | "foobar"     | osPath("/bin")
-        "setExecutableByFile"        | "Provider<File>"        | "pancakes"            | "pancakes"            | "pancakes"   | null
-        "setExecutableByRegularFile" | "RegularFile"           | osPath("/bin/foobar") | osPath("/bin/foobar") | "foobar"     | osPath("/bin")
-        "setExecutableByRegularFile" | "Provider<RegularFile>" | osPath("/bin/foobar") | osPath("/bin/foobar") | "foobar"     | osPath("/bin")
-        "setExecutableDirectory"     | "Directory"             | "foo/bar"             | null                  | null         | TestValue.projectFile("foo/bar")
-        "setExecutableName"          | "String"                | "wooby"               | "wooby"               | "wooby"      | null
+        method                   | type                    | rawValue              | expectedPath          | expectedName | expectedDirectory
+        "setExecutable"          | "String"                | "foobar"              | "foobar"              | "foobar"     | null
+        "setExecutable"          | "String"                | osPath("/bin/foobar") | osPath("/bin/foobar") | "foobar"     | osPath("/bin")
+        "setExecutable"          | "Provider<String>"      | "foobar"              | "foobar"              | "foobar"     | null
+        "setExecutable"          | "Provider<String>"      | osPath("/bin/foobar") | osPath("/bin/foobar") | "foobar"     | osPath("/bin")
+        "setExecutable"          | "File"                  | osPath("/bin/foobar") | osPath("/bin/foobar") | "foobar"     | osPath("/bin")
+        "setExecutable"          | "Provider<File>"        | "pancakes"            | "pancakes"            | "pancakes"   | null
+        "setExecutable"          | "RegularFile"           | osPath("/bin/foobar") | osPath("/bin/foobar") | "foobar"     | osPath("/bin")
+        "setExecutable"          | "Provider<RegularFile>" | osPath("/bin/foobar") | osPath("/bin/foobar") | "foobar"     | osPath("/bin")
+        "setExecutable"          | "Closure<File>"         | osPath("/bin/foobar") | osPath("/bin/foobar") | "foobar"     | osPath("/bin")
+        "setExecutable"          | "Closure<String>"       | "foobar"              | "foobar"              | "foobar"     | null
+        "setExecutable"          | "Closure<String>"       | osPath("/bin/foobar") | osPath("/bin/foobar") | "foobar"     | osPath("/bin")
+        "setExecutableDirectory" | "Directory"             | "foo/bar"             | null                  | null         | projectFile("foo/bar")
+        "setExecutableName"      | "String"                | "wooby"               | "wooby"               | "wooby"      | null
 
         value = wrapValueBasedOnType(rawValue, type)
         path = "${subjectUnderTestName}"
@@ -81,7 +105,7 @@ class ExecSpecImplTaskIntegrationSpec extends MockTaskIntegrationSpec<ExecSpecIm
         def file = generateBatchWrapper("superkatzen", false)
 
         and: "it being set onto the task"
-        appendToSubjectTask("setExecutableByFile(${wrapValueBasedOnType(file.path, File)})")
+        appendToSubjectTask("setExecutable(${wrapValueBasedOnType(file.path, File)})")
 
         and: "additional arguments being set"
         appendToSubjectTask("setAdditionalArguments(${wrapValueBasedOnType(arg, String)})")
@@ -107,8 +131,8 @@ class ExecSpecImplTaskIntegrationSpec extends MockTaskIntegrationSpec<ExecSpecIm
         "workingDirectory" | osPath("/foo/bar") | String
 
         setter = new PropertySetterWriter(subjectUnderTestName, property)
-            .set(value, type)
-            .toScript()
+                .set(value, type)
+                .toScript()
 
         getter = new PropertyGetterTaskWriter(setter)
     }
@@ -125,7 +149,7 @@ class ExecSpecImplTaskIntegrationSpec extends MockTaskIntegrationSpec<ExecSpecIm
 
         and: "a configured log file spec"
         appendToSubjectTask("""
-        setExecutableByFile(${wrapValueBasedOnType(file.path, File)})
+        setExecutable(${wrapValueBasedOnType(file.path, File)})
         stdoutFile.logFile = ${wrapValueBasedOnType(stdoutFile != null ? stdoutFile.path : null, File)}
         stderrFile.logFile = ${wrapValueBasedOnType(stderrFile != null ? stderrFile.path : null, File)}
         logToStdout = ${wrapValueBasedOnType(logToStdout, Boolean)}
