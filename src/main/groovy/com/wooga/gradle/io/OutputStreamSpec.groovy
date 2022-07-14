@@ -1,13 +1,18 @@
 package com.wooga.gradle.io
 
 import com.wooga.gradle.BaseSpec
-import org.gradle.api.file.RegularFile
-import org.gradle.api.file.RegularFileProperty
+import groovy.transform.stc.ClosureParams
+import groovy.transform.stc.FromString
+import org.gradle.api.Action
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Internal
 import org.gradle.internal.SystemProperties
 
+import java.util.function.Function
+
+/**
+ * Generates an {@link OutputStream}
+ */
 trait OutputStreamSpec extends BaseSpec {
 
     private final Property<Boolean> logToStdout = objects.property(Boolean)
@@ -43,3 +48,5 @@ trait OutputStreamSpec extends BaseSpec {
         return outputStream
     }
 }
+
+
