@@ -3,9 +3,14 @@ package com.wooga.gradle.io
 
 import com.wooga.gradle.test.BatchmodeWrapper
 import nebula.test.ProjectSpec
+import org.junit.Rule
+import org.junit.contrib.java.lang.system.EnvironmentVariables
 import spock.lang.Unroll
 
 class ProcessExecutorTaskSpec extends ProjectSpec {
+
+    @Rule
+    EnvironmentVariables env = new EnvironmentVariables()
 
     def "can execute"() {
         given:
@@ -19,29 +24,67 @@ class ProcessExecutorTaskSpec extends ProjectSpec {
     }
 
     @Unroll
-    def "can execute with arguments #arguments, environment #environment"() {
+    def "can execute with arguments #arguments"() {
         given:
         def file = new BatchmodeWrapper("foobar").toTempFile()
 
+        and: "stdout stream to verify arguments and environment passed"
+        def output = new ByteArrayOutputStream()
         when:
         def result = ProcessExecutor.from(project)
-            .withExecutable(file)
-            .withArguments(arguments)
-            .withEnvironment(environment)
-            .execute()
+                .withExecutable(file)
+                .withArguments(arguments)
+                .withStandardOutput(output)
+                .execute()
 
         then:
         result.assertNormalExitValue()
-        def text = file.text
-        if (arguments != null) {
-            def check = arguments
-            text.contains("[ARGUMENTS]:\n${check}")
-        }
+        def o = output.toString()
+
+        def argumentCheck = (arguments ? [arguments] : []).flatten().toList().join(" ")
+        o.contains("[ARGUMENTS]:\n${argumentCheck}")
 
         where:
-        arguments      | environment
-        "foobar"       | null
-        ["foo", "bar"] | null
+        arguments      | _
+        "foobar"       | _
+        ["foo", "bar"] | _
+        ["foo", "bar"] | _
+        []             | _
+    }
+
+    @Unroll
+    def "can execute with environment #environment and append #appendEnvironment"() {
+        given:
+        def file = new BatchmodeWrapper("foobar").toTempFile()
+
+        and: "stdout stream to verify arguments and environment passed"
+        def output = new ByteArrayOutputStream()
+
+        and: "a base environment"
+        env.set("BaseValue", "BaseEntry")
+
+        when:
+        def result = ProcessExecutor.from(project)
+                .withExecutable(file)
+                .withEnvironment(environment, appendEnvironment)
+                .withStandardOutput(output)
+                .execute()
+
+        then:
+        result.assertNormalExitValue()
+        def o = output.toString()
+
+        def environmentsLines = o.split(/\[ENVIRONMENT\]\:\n/).last().readLines()
+        def environmentCheck = (environment ?: []).collect { key, value -> "${key}=${value}".toString() }
+        environmentsLines.containsAll(environmentCheck)
+        environmentsLines.contains("BaseValue=BaseEntry") == appendEnvironment
+
+        where:
+        environment                  | appendEnvironment
+        [:]                          | false
+        [:]                          | true
+        ["FOO": "BAR", "BAR": "BAZ"] | false
+        ["FOO": "BAR"]               | true
     }
 
     static class MockOutput implements ProcessOutputSpec {

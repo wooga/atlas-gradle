@@ -72,9 +72,9 @@ class ProcessExecutor {
     }
 
     ProcessExecutor withArguments(ArgumentsSpec spec, Boolean includeEnvironment = true) {
-        withArguments(spec.arguments.getOrNull())
+        withArguments(spec.arguments.getOrElse([]))
         if (includeEnvironment) {
-            withEnvironment(spec.environment.getOrNull())
+            withEnvironment(spec.environment.getOrElse([:]))
         }
         this
     }
@@ -84,8 +84,8 @@ class ProcessExecutor {
         this
     }
 
-    ProcessExecutor withArguments(String arg) {
-        this.arguments = [arg]
+    ProcessExecutor withArguments(String... args) {
+        this.arguments = args.toList()
         this
     }
 
@@ -98,10 +98,8 @@ class ProcessExecutor {
     }
 
     ProcessExecutor withEnvironment(Map<String, ?> environment, Boolean append = true) {
-        if (environment != null) {
-            this.environment = environment
-            this.appendToEnvironment = append
-        }
+        this.environment = environment
+        this.appendToEnvironment = append
         this
     }
 
@@ -213,11 +211,11 @@ class ProcessExecutor {
                     it.args = arguments
                 }
 
-                if (environment != null) {
+                if (this.environment != null) {
                     if (appendToEnvironment) {
-                        it.environment(environment)
+                        it.environment(this.environment)
                     } else {
-                        it.environment = environment
+                        it.environment = this.environment
                     }
                 }
 
