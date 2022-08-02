@@ -273,40 +273,44 @@ class PropertyLookup {
     /**
      * @return A provider which returns a {@code RegularFile}
      */
-    Provider<RegularFile> getFileValueProvider(ProviderFactory factory, ProjectLayout layout, Map<String, ?> properties, Map<String, ?> env = null, Object defaultValue = null) {
-        layout.buildDirectory.file(
-            factory.provider({
-                getValueAsString(properties, env, defaultValue)
-            })
-        )
+    Provider<RegularFile> getFileValueProvider(ProviderFactory factory, ProjectLayout layout, Map<String, ?> properties,
+                                               Map<String, ?> env = null, Object defaultValue = null, Provider<Directory> baseDir = layout.buildDirectory) {
+
+        // We can get rid of the factory here, by just returning the "baseDir.map..." expression. But removing it would be a breaking change, so its better to keep it here for now.
+        // We could just keep the factory unused as well, but I believe if someone is passing a factory to a function it would want that factory creating his providers, so...
+        factory.provider {
+            baseDir.map{it.file(getValueAsString(properties, env, defaultValue)) }
+        }.flatMap{it}
     }
 
     /**
      * @return A provider which returns a {@code RegularFile}
      */
-    Provider<RegularFile> getFileValueProvider(Project project, Object defaultValue = null) {
+    Provider<RegularFile> getFileValueProvider(Project project, Object defaultValue = null, Provider<Directory> baseDir = project.layout.buildDirectory) {
         project.provider({
-            getFileValueProvider(project.providers, project.layout, project.properties, System.getenv(), defaultValue)
+            getFileValueProvider(project.providers, project.layout, project.properties, System.getenv(), defaultValue, baseDir)
         }).flatMap({ it })
     }
 
     /**
      * @return A provider which returns a {@code Directory}
      */
-    Provider<Directory> getDirectoryValueProvider(ProviderFactory factory, ProjectLayout layout, Map<String, ?> properties, Map<String, ?> env = null, Object defaultValue = null) {
-        layout.buildDirectory.dir(
-            factory.provider({
-                getValueAsString(properties, env, defaultValue)
-            })
-        )
+    Provider<Directory> getDirectoryValueProvider(ProviderFactory factory, ProjectLayout layout, Map<String, ?> properties,
+                                                  Map<String, ?> env = null, Object defaultValue = null, Provider<Directory> baseDir = layout.buildDirectory) {
+        // We can get rid of the factory here, by just returning the "baseDir.map..." expression. But removing it would be a breaking change, so its better to keep it here for now.
+        // We could just keep the factory unused as well, but I believe if someone is passing a factory to a function it would want that factory creating his providers, so...
+        factory.provider {
+            baseDir.map{it.dir(getValueAsString(properties, env, defaultValue)) }
+        }.flatMap {it}
+
     }
 
     /**
      * @return A provider which returns a {@code Directory}
      */
-    Provider<Directory> getDirectoryValueProvider(Project project, Object defaultValue = null) {
+    Provider<Directory> getDirectoryValueProvider(Project project, Object defaultValue = null, Provider<Directory> baseDir = project.layout.buildDirectory) {
         project.provider({
-            getDirectoryValueProvider(project.providers, project.layout, project.properties, System.getenv(), defaultValue)
+            getDirectoryValueProvider(project.providers, project.layout, project.properties, System.getenv(), defaultValue, baseDir)
         }).flatMap({ it })
     }
 

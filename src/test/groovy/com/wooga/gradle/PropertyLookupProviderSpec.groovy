@@ -1,6 +1,8 @@
 package com.wooga.gradle
 
 import nebula.test.ProjectSpec
+import org.gradle.api.Project
+import org.gradle.api.file.Directory
 import spock.lang.Unroll
 
 class PropertyLookupProviderSpec extends ProjectSpec {
@@ -228,4 +230,49 @@ class PropertyLookupProviderSpec extends ProjectSpec {
         propertyKey | propertyValue
         "foo"       | "bar"
     }
+
+    @Unroll
+    def "gets file property value relative to base directory"() {
+        given: "a property lookup"
+        def lookup = new PropertyLookup(value)
+
+        and: "a file provider for it"
+        def baseDir = project.provider { baseDirFactory(project) as Directory }
+        def provider = lookup.getFileValueProvider(project, null, baseDir)
+
+        when:
+        def actual = provider.get()
+
+        then:
+        def expected = baseDir.map { it.file(value) }.get()
+        expected == actual
+
+        where:
+        value       | baseDirFactory
+        "file"      | { Project p -> p.layout.projectDirectory }
+        "otherFile" | { Project p -> p.layout.projectDirectory.dir("dir") }
+    }
+
+    @Unroll
+    def "gets directory property value relative to base directory"() {
+        given: "a property lookup"
+        def lookup = new PropertyLookup(value)
+
+        and: "a file provider for it"
+        def baseDir = project.provider { baseDirFactory(project) as Directory }
+        def provider = lookup.getDirectoryValueProvider(project, null, baseDir)
+
+        when:
+        def actual = provider.get()
+
+        then:
+        def expected = baseDir.map { it.dir(value) }.get()
+        expected == actual
+
+        where:
+        value    | baseDirFactory
+        "dir"    | { Project p -> p.layout.projectDirectory }
+        "subdir" | { Project p -> p.layout.projectDirectory.dir("dir") }
+    }
+
 }
