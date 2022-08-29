@@ -1,4 +1,4 @@
-package com.wooga.gradle.extensions
+package com.wooga.gradle.extensions.internal
 
 import org.gradle.api.internal.provider.AbstractMinimalProvider
 import org.gradle.api.provider.Provider
@@ -10,6 +10,12 @@ import javax.annotation.Nullable
 import java.util.function.Consumer
 import java.util.function.Function
 
+
+/**
+ * Provider that executes a function when an exception is thrown in any previous point of its chain.
+ * @see com.wooga.gradle.extensions.ProviderExtensions#onError(org.gradle.api.provider.Provider, Function)
+ * @see com.wooga.gradle.extensions.ProviderExtensions#onError(org.gradle.api.provider.Provider, Exception)
+ */
 class OnErrorProvider<T> extends AbstractMinimalProvider<T> {
 
     final AbstractMinimalProvider<T> base

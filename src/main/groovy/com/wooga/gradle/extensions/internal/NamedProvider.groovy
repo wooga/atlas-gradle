@@ -1,4 +1,4 @@
-package com.wooga.gradle.extensions
+package com.wooga.gradle.extensions.internal
 
 import org.gradle.api.internal.provider.AbstractMinimalProvider
 import org.gradle.api.internal.provider.DefaultProvider
@@ -8,6 +8,11 @@ import org.gradle.internal.DisplayName
 
 import javax.annotation.Nullable
 
+
+/**
+ * Provider that has a name. Useful for error tracking.
+ * @see com.wooga.gradle.extensions.ProviderExtensions#named(org.gradle.api.provider.Provider, String)
+ */
 class NamedProvider<T> extends AbstractMinimalProvider<T> {
 
     final AbstractMinimalProvider<T> base
@@ -41,6 +46,5 @@ class NamedProvider<T> extends AbstractMinimalProvider<T> {
     String toString() {
         return "provider[$name]($base)"
     }
-
 }
 
