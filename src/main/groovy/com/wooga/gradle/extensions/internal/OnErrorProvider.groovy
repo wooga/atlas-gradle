@@ -1,4 +1,4 @@
-package com.wooga.gradle.extensions
+package com.wooga.gradle.extensions.internal
 
 import org.gradle.api.internal.provider.AbstractMinimalProvider
 import org.gradle.api.provider.Provider
