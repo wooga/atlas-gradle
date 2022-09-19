@@ -241,14 +241,15 @@ class PropertyLookupProviderSpec extends ProjectSpec {
         def provider = lookup.getFileValueProvider(project, null, baseDir)
 
         when:
-        def actual = provider.get()
+        def actual = provider.orNull
 
         then:
-        def expected = baseDir.map { it.file(value) }.get()
+        def expected = value? baseDir.get().file(value) : null
         expected == actual
 
         where:
         value       | baseDirFactory
+        null        | { Project p -> p.layout.projectDirectory }
         "file"      | { Project p -> p.layout.projectDirectory }
         "otherFile" | { Project p -> p.layout.projectDirectory.dir("dir") }
     }
@@ -263,14 +264,15 @@ class PropertyLookupProviderSpec extends ProjectSpec {
         def provider = lookup.getDirectoryValueProvider(project, null, baseDir)
 
         when:
-        def actual = provider.get()
+        def actual = provider.orNull
 
         then:
-        def expected = baseDir.map { it.dir(value) }.get()
+        def expected = value? baseDir.get().dir(value) : null
         expected == actual
 
         where:
         value    | baseDirFactory
+        null     | { Project p -> p.layout.projectDirectory }
         "dir"    | { Project p -> p.layout.projectDirectory }
         "subdir" | { Project p -> p.layout.projectDirectory.dir("dir") }
     }
