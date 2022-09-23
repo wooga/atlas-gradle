@@ -297,7 +297,7 @@ class PropertyLookup {
                                                   Map<String, ?> env = null, Object defaultValue = null, Provider<Directory> baseDir = layout.buildDirectory) {
         // We can get rid of the factory here, by just returning the "baseDir.map..." expression. But removing it would be a breaking change, so its better to keep it here for now.
         // We could just keep the factory unused as well, but I believe if someone is passing a factory to a function it would want that factory creating his providers, so...
-        baseDir.flatMap{
+        baseDir.flatMap {
             it.dir(factory.provider { getValueAsString(properties, env, defaultValue) })
         }
     }
@@ -306,7 +306,12 @@ class PropertyLookup {
      * @return A provider which returns a {@code Directory}
      */
     Provider<Directory> getDirectoryValueProvider(Project project, Object defaultValue = null, Provider<Directory> baseDir = project.layout.buildDirectory) {
-        return getDirectoryValueProvider(project.providers, project.layout, project.properties, System.getenv(), defaultValue, baseDir)
+        // We need to wrap this call into another provider to guard from eager evaluation of project.properties.
+        // There are test setups via nebular test which sometimes create the project base dir at a later time and
+        // the access to project.properties results in an exception.
+        project.provider({
+            getDirectoryValueProvider(project.providers, project.layout, project.properties, System.getenv(), defaultValue, baseDir)
+        }).flatMap({ it })
     }
 
     /**
