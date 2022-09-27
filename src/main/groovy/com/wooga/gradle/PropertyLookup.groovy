@@ -287,7 +287,12 @@ class PropertyLookup {
      * @return A provider which returns a {@code RegularFile}
      */
     Provider<RegularFile> getFileValueProvider(Project project, Object defaultValue = null, Provider<Directory> baseDir = project.layout.buildDirectory) {
-        return getFileValueProvider(project.providers, project.layout, project.properties, System.getenv(), defaultValue, baseDir)
+        // We need to wrap this call into another provider to guard from eager evaluation of project.properties.
+        // There are test setups via nebular test which sometimes create the project base dir at a later time and
+        // the access to project.properties results in an exception.
+        project.provider({
+            getFileValueProvider(project.providers, project.layout, project.properties, System.getenv(), defaultValue, baseDir)
+        }).flatMap({it})
     }
 
     /**
