@@ -199,7 +199,7 @@ class PropertyLookupProviderSpec extends ProjectSpec {
         def provider = lookup.getEnumValueProvider(project, SuperCoolEnum.class, defaultValue)
 
         when:
-        def actual = provider.get()
+        def actual = provider.getOrNull()
 
         then:
         actual == expected
@@ -210,6 +210,9 @@ class PropertyLookupProviderSpec extends ProjectSpec {
         SuperCoolEnum.cold | null              | SuperCoolEnum.cold
         "hot"              | "cold"            | SuperCoolEnum.cold
         SuperCoolEnum.cold | SuperCoolEnum.hot | SuperCoolEnum.hot
+        ""                 | null              | null
+        ""                 | "cold"            | SuperCoolEnum.cold
+        null               | null              | null
     }
 
 
@@ -244,7 +247,7 @@ class PropertyLookupProviderSpec extends ProjectSpec {
         def actual = provider.orNull
 
         then:
-        def expected = value? baseDir.get().file(value) : null
+        def expected = value ? baseDir.get().file(value) : null
         expected == actual
 
         where:
@@ -267,7 +270,7 @@ class PropertyLookupProviderSpec extends ProjectSpec {
         def actual = provider.orNull
 
         then:
-        def expected = value? baseDir.get().dir(value) : null
+        def expected = value ? baseDir.get().dir(value) : null
         expected == actual
 
         where:
