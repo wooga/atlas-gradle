@@ -348,6 +348,10 @@ class PropertyLookup {
         }
 
         getObjectValueProvider(project, defaultValue).map({
+            def stringValue = it.toString()
+            if (stringValue == null || stringValue.empty) {
+                return defaultValue
+            }
             def enumValue = enumClass.invokeMethod("valueOf", it.toString())
             enumValue
         }) as Provider<T>
