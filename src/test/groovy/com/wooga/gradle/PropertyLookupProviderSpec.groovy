@@ -58,6 +58,35 @@ class PropertyLookupProviderSpec extends ProjectSpec {
     }
 
     @Unroll
+    def "sets `#value`, gets value `#expected` List<String> provider"() {
+
+        given: "a property lookup"
+        def lookup = new PropertyLookup(value)
+
+        and: "a provider for it"
+        def provider = lookup.getListStringValueProvider(project, defaultValue)
+
+        when:
+        def actual = provider.getOrNull()
+
+        then:
+        expected == actual
+
+        where:
+        value              | expected                 | defaultValue
+        "foobar"           | ["foobar"]               | null
+        "foobar"           | ["barfoo"]               | "barfoo"
+        "[foobar]"         | ["foobar"]               | null
+        "foo,bar"          | ["foo", "bar"]           | null
+        "[foo,bar]"        | ["foo", "bar"]           | null
+        "foo;bar;foobar"   | ["foo", "bar", "foobar"] | null
+        "[foo;bar;foobar]" | ["foo", "bar", "foobar"] | null
+        ""                 | null                     | null
+        null               | null                     | null
+        null               | ["barfoo"]               | "barfoo"
+    }
+
+    @Unroll
     def "gets value `#expected` from boolean provider"() {
 
         given: "a property lookup"
