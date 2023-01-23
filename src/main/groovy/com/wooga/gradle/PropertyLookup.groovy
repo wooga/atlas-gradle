@@ -235,6 +235,29 @@ class PropertyLookup {
     }
 
     /**
+     * @return A provider which returns a {@code String}
+     */
+    Provider<List<String>> getListStringValueProvider(ProviderFactory factory, Map<String, ?> properties, Map<String, ?> env = null, Object defaultValue = null) {
+        factory.provider({
+            // Convert the raw value to List<String>
+            def value = getValueAsString(properties, env, defaultValue)
+            if (value == null || value == "") {
+                return null
+            }
+            value.tokenize(',;|[]')
+        })
+    }
+
+    /**
+     * @return A provider which returns a {@code List<String>}
+     */
+    Provider<List<String>> getListStringValueProvider(Project project, Object defaultValue = null) {
+        project.provider({
+            getListStringValueProvider(project.getProviders(), project.properties, System.getenv(), defaultValue)
+        }).flatMap({ it })
+    }
+
+    /**
      * @return A provider which returns a {@code Boolean}
      */
     Provider<Boolean> getBooleanValueProvider(ProviderFactory factory, Map<String, ?> properties, Map<String, ?> env = null, Object defaultValue = null) {
@@ -292,7 +315,7 @@ class PropertyLookup {
         // the access to project.properties results in an exception.
         project.provider({
             getFileValueProvider(project.providers, project.layout, project.properties, System.getenv(), defaultValue, baseDir)
-        }).flatMap({it})
+        }).flatMap({ it })
     }
 
     /**
