@@ -35,7 +35,7 @@ class ProviderExtensions {
      * @param transformation - Operation to be executed only once.
      * @return {@link com.wooga.gradle.extensions.internal.RunOnceProvider} with the given transformation.
      */
-    static <T, OUT, IN> Provider<T> mapOnce(final Provider<T> self, Transformer<? extends OUT, ? super IN> transformer) {
+    static <T, S> Provider<S> mapOnce(final Provider<T> self, Transformer<? extends S, ? super T> transformer) {
         return new RunOnceProvider(transformer, self as ProviderInternal)
     }
 
@@ -75,7 +75,7 @@ class ProviderExtensions {
      */
     static <T> Provider<T> log(final Provider<T> self, Logger logger = DEFAULT_LOGGER, @DelegatesTo(Logger) Closure<Void> logOp) {
         logOp.setDelegate(logger)
-        return self.mapOnce {it ->
+        return self.mapOnce {T it ->
             logOp(it)
             return it
         }
