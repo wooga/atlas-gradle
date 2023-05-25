@@ -42,9 +42,8 @@ class ProviderExtensionsSpec extends ProjectSpec {
         zippedProvider.get()
 
         then:
-        //zip like to be different from the other provider functions
-        def e = thrown(InvalidUserDataException)
-        e.message.contains("Provider has no value: provider[$providerName]")
+        def e = thrown(MissingValueException)
+        e.message.contains("The value of this provider is derived from: $providerName")
     }
 
     @Unroll

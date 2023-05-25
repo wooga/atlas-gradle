@@ -3,6 +3,7 @@ package com.wooga.gradle.io
 import com.wooga.gradle.MockIntegrationSpec
 import com.wooga.gradle.MockTask
 import com.wooga.gradle.MockTaskIntegrationSpec
+import com.wooga.gradle.test.executable.FakeExecutables
 import org.gradle.api.Action
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.TaskAction
@@ -14,7 +15,8 @@ class OutputStreamTask extends MockTask implements LogFileSpec, OutputStreamSpec
 
     @TaskAction
     void run() {
-        def _executable = MockIntegrationSpec.generateBatchWrapper("superhund")
+        def execPath = new File(project.projectDir, "superhund").absolutePath
+        def _executable = FakeExecutables.argsReflector(execPath, 0).executable
         def _logFile = logFile.present ? logFile.get().asFile : null
 
         ExecResult execResult = project.exec(new Action<ExecSpec>() {
@@ -61,6 +63,6 @@ class OutputStreamSpecTest extends MockTaskIntegrationSpec<OutputStreamTask> {
         false       | false      | false
 
         mockFileName = "foobar24"
-        expected = "[ARGUMENTS]:"
+        expected = "[[arguments]]"
     }
 }
