@@ -2,10 +2,14 @@ package com.wooga.gradle
 
 import com.wooga.gradle.test.MapPropertyQueryTaskWriter
 import com.wooga.gradle.test.PropertyQueryTaskWriter
+import com.wooga.gradle.test.executable.ArgsReflectorExecutable
+import com.wooga.gradle.test.executable.FakeExecutables
 import org.gradle.api.Action
 import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecResult
 import org.gradle.process.ExecSpec
+import org.junit.Rule
+import org.junit.contrib.java.lang.system.EnvironmentVariables
 import spock.lang.Unroll
 
 class ArgumentsUsingTask extends MockTask implements ArgumentsSpec {
@@ -20,7 +24,8 @@ class ArgumentsUsingTask extends MockTask implements ArgumentsSpec {
 
     @TaskAction
     void run() {
-        def _executable = MockIntegrationSpec.generateBatchWrapper("superkatzen", true)
+        def execPath = new File(project.projectDir, "superkatzen").absolutePath
+        def _executable = FakeExecutables.argsReflector(execPath, 0).executable
         def _arguments = arguments.get()
         def _environment = environment.get()
 
