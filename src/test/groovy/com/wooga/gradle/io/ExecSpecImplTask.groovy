@@ -186,4 +186,3 @@ class ExecSpecImplTaskIntegrationSpec extends MockTaskIntegrationSpec<ExecSpecIm
         "oh yes" | "oh no" | File.createTempFile("stdout", ".log") | File.createTempFile("stderr", ".log") | true        | true
     }
 }
-

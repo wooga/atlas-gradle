@@ -1,20 +1,11 @@
 package com.wooga.gradle
 
-
 import org.gradle.api.DefaultTask
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-import org.junit.Rule
-import org.junit.contrib.java.lang.system.ProvideSystemProperty
 
 import java.lang.reflect.ParameterizedType
 import java.nio.file.Files
 
 abstract class MockIntegrationSpec extends com.wooga.gradle.test.IntegrationSpec {
-
-    def setup() {
-        applyPlugin(MockPlugin)
-    }
 
     static File generateBatchWrapper(String fileName, Boolean printEnvironment = false) {
         File wrapper
@@ -55,13 +46,44 @@ abstract class MockIntegrationSpec extends com.wooga.gradle.test.IntegrationSpec
     }
 }
 
+abstract class MockPluginIntegrationSpec<T extends MockPlugin> extends com.wooga.gradle.test.IntegrationSpec {
+
+    Class<T> getPluginClass() {
+        if (!_pluginClass) {
+            try {
+                this._pluginClass = (Class<T>) ((ParameterizedType) this.getClass().getGenericSuperclass())
+                    .getActualTypeArguments()[0];
+            }
+            catch (Exception e) {
+                this._pluginClass = (Class<T>) MockPlugin
+            }
+        }
+        _pluginClass
+    }
+    private Class<T> _pluginClass
+
+    def setup() {
+        buildFile << "${applyPlugin(pluginClass)}${System.lineSeparator()}"
+    }
+
+    void appendToExtension(String... lines) {
+        buildFile << """ ${MockPlugin.extensionName} {
+        ${lines.join('\n')}
+        }
+        """.stripIndent()
+    }
+}
+
+class MockTask extends DefaultTask {
+}
+
 abstract class MockTaskIntegrationSpec<T extends MockTask> extends MockIntegrationSpec {
 
     Class<T> getSubjectUnderTestClass() {
         if (!_sutClass) {
             try {
                 this._sutClass = (Class<T>) ((ParameterizedType) this.getClass().getGenericSuperclass())
-                        .getActualTypeArguments()[0];
+                    .getActualTypeArguments()[0];
             }
             catch (Exception e) {
                 this._sutClass = (Class<T>) MockTask
@@ -79,7 +101,7 @@ abstract class MockTaskIntegrationSpec<T extends MockTask> extends MockIntegrati
         subjectUnderTestClass.getTypeName()
     }
 
-    def setup(){
+    def setup() {
         addMockTask(false)
     }
 
@@ -107,43 +129,4 @@ abstract class MockTaskIntegrationSpec<T extends MockTask> extends MockIntegrati
         }
         """.stripIndent()
     }
-}
-
-class MockPlugin implements Plugin<Project> {
-
-    static final String extensionName = "commons"
-
-    @Override
-    void apply(Project project) {
-        def extension = project.extensions.create(MockExtension, extensionName, MockExtension)
-        project.tasks.withType(MockTask).configureEach { t ->
-        }
-    }
-}
-
-class MockExtension {
-}
-
-class MockConventions {
-
-    static final PropertyLookup name = new PropertyLookup(
-        "MOCK_NAME",
-        "mock.name",
-        "foobar"
-    )
-
-    static final PropertyLookup version = new PropertyLookup(
-        "MOCK_VERSION",
-        "mock.version",
-        "latest"
-    )
-
-    static final PropertyLookup directory = new PropertyLookup(
-        "MOCK_DIR",
-        "mock.dir",
-        null
-    )
-}
-
-class MockTask extends DefaultTask {
 }
