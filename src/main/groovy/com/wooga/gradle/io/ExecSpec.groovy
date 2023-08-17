@@ -33,12 +33,9 @@ trait ExecSpec implements BaseSpec {
      */
     @Input
     Provider<String> getExecutable() {
-        if (executableDirectory.present) {
-            return executableDirectory.file(executableName).map {
-                it.asFile.absolutePath
-            }
-        }
-        return executableName
+        return executableDirectory.file(executableName).map {
+            it.asFile.absolutePath
+        }.orElse(executableName)
     }
 
     /**
