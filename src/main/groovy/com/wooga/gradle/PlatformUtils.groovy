@@ -1,6 +1,9 @@
 package com.wooga.gradle
 
 import groovy.json.StringEscapeUtils
+import org.gradle.internal.snapshot.PathUtil
+
+import java.nio.file.Path
 
 class PlatformUtils {
 
@@ -43,10 +46,17 @@ class PlatformUtils {
     }
 
     /**
-     * @return True if the operating system is Linux
+     * @return True if the operating system is a Linux distribution
      */
     static boolean isLinux() {
         return (_osName.indexOf("linux") >= 0)
+    }
+
+    /**
+     * @return True if the operating system is Unix (belonging to the family derived from the AT&T one)
+     */
+    static boolean isUnix() {
+        return _osName.indexOf("unix") >= 0
     }
 
     /**
@@ -67,4 +77,47 @@ class PlatformUtils {
     static String getUnixUserHomePath() {
         System.getProperty("user.home")
     }
+
+    /**
+     * Adjusts the given file path according to the file system being used.
+     * This is to make sure paths are treated equally across different platforms
+     * @param path A relative or absolute file path
+     * @param rootDirectory Optionally, a root directory to start from if the path is found to be relative
+     * @return An absolute file path
+     */
+    static String normalizePath(String path, String rootDirectory) {
+
+        Boolean absolute = path.startsWith('/')
+        if (absolute) {
+            if (windows) {
+                String volume = getDiskVolume()
+                path = "${volume}${path[1..-1]}"
+            }
+        }
+        else if (rootDirectory != null && rootDirectory != "") {
+            path = "${rootDirectory}/${path}"
+        }
+        new File(path).path
+    }
+
+    static String normalizePath(String path) {
+        normalizePath(path, null)
+    }
+
+    /**
+     * @return Returns the name of the disk volume (such as 'C:/' for Windows)
+     */
+    static String getDiskVolume() {
+        if (_diskVolume == null) {
+            def current = new File(".").absoluteFile
+            while (current.parentFile != null) {
+                current = current.parentFile
+            }
+            _diskVolume = current.toString()
+        }
+        _diskVolume
+    }
+    private static String _diskVolume
+
+
 }
